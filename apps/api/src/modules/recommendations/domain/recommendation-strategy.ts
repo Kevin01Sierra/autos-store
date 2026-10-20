@@ -19,8 +19,16 @@ export interface RecommendationStrategy {
   score(vehicle: VehicleDto, context: RecommendationContext): StrategyScore;
 }
 
+// Los mapas se arman una vez por petición: el máximo se calcula una vez, no por cada vehículo.
+const maxByMap = new WeakMap<Map<string, number>, number>();
+
 /** Normaliza un valor frente al máximo de su mapa (0 si no hay datos). */
-export const normalize = (value: number, values: Iterable<number>): number => {
-  const max = Math.max(0, ...values);
+export const normalize = (value: number, units: Map<string, number>): number => {
+  let max = maxByMap.get(units);
+  if (max === undefined) {
+    max = 0;
+    for (const n of units.values()) max = Math.max(max, n);
+    maxByMap.set(units, max);
+  }
   return max === 0 ? 0 : value / max;
 };

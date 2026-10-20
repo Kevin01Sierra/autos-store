@@ -20,8 +20,8 @@ export abstract class CrudService<TEntity, TCreate, TUpdate, TInput = TCreate> {
     return this.orFail(await this.repository.findById(id), id);
   }
 
-  create(input: TInput): Promise<TEntity> {
-    return this.repository.create(this.prepareCreate(input));
+  async create(input: TInput): Promise<TEntity> {
+    return this.repository.create(await this.prepareCreate(input));
   }
 
   async update(id: string, input: TUpdate): Promise<TEntity> {
@@ -32,7 +32,7 @@ export abstract class CrudService<TEntity, TCreate, TUpdate, TInput = TCreate> {
     if (!(await this.repository.remove(id))) throw new NotFoundError(this.entityName, id);
   }
 
-  protected abstract prepareCreate(input: TInput): TCreate;
+  protected abstract prepareCreate(input: TInput): TCreate | Promise<TCreate>;
 
   protected prepareUpdate(input: TUpdate): TUpdate {
     return input;

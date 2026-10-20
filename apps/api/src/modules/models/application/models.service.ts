@@ -23,12 +23,16 @@ export class ModelsService extends CrudService<ModelDto, NewModel, ModelChanges,
   }
 
   /** Valida que la marca exista y arma el slug "marca-modelo". */
-  override async create(input: CreateModelDto): Promise<ModelDto> {
+  protected async prepareCreate(input: CreateModelDto): Promise<NewModel> {
     const brand = await this.brands.get(input.brandId);
-    return this.models.create({ ...input, slug: slugify(brand.slug, input.name) });
+    return { ...input, slug: slugify(brand.slug, input.name) };
   }
 
-  protected prepareCreate(input: CreateModelDto): NewModel {
-    return { ...input, slug: slugify(input.name) };
+  /** Al renombrar o cambiar de marca, el slug se rehace igual que al crear. */
+  override async update(id: string, input: ModelChanges): Promise<ModelDto> {
+    if (!input.name && !input.brandId) return super.update(id, input);
+    const current = await this.get(id);
+    const brand = await this.brands.get(input.brandId ?? current.brandId);
+    return super.update(id, { ...input, slug: slugify(brand.slug, input.name ?? current.name) });
   }
 }

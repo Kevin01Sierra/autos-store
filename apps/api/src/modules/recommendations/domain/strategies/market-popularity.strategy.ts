@@ -19,7 +19,7 @@ export class MarketPopularityStrategy implements RecommendationStrategy {
       : vehicle.modelName;
     return {
       // Al sumar versiones el total puede superar al máximo individual: se acota a 1.
-      score: Math.min(1, normalize(units, marketUnits.values())),
+      score: Math.min(1, normalize(units, marketUnits)),
       reason: `${label}: ${units.toLocaleString('es-CO')} unidades registradas en el mercado`,
     };
   }

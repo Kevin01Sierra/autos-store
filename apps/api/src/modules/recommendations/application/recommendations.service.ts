@@ -11,6 +11,7 @@ import {
   type PreferencesRepository, type SalesStatsReader,
 } from './recommendation.ports.js';
 
+// shortcut: solo compiten los 100 publicados más recientes; con un catálogo mayor, filtrar en SQL.
 const CANDIDATE_POOL = 100;
 
 @Injectable()

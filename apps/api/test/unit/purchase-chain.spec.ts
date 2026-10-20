@@ -1,3 +1,4 @@
+import { purchaseSchema } from '@autos/contracts';
 import { describe, expect, it } from 'vitest';
 import { createPurchaseChain } from '../../src/modules/orders/application/purchase-chain.factory.js';
 import { aCustomer, aVehicle } from '../support/vehicle.fixture.js';
@@ -28,5 +29,10 @@ describe('Cadena de validación de compra', () => {
 
   it('rechaza más de 5 unidades en total', () => {
     expect(() => validate(aVehicle({ stock: 10 }), 6)).toThrow('Máximo 5');
+  });
+
+  it('el contrato rechaza el mismo vehículo repetido en dos líneas', () => {
+    const line = { vehicleId: aVehicle().id, quantity: 1 };
+    expect(purchaseSchema.safeParse({ items: [line, line] }).success).toBe(false);
   });
 });
