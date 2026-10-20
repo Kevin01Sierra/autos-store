@@ -1,0 +1,51 @@
+/* Design tokens: una sola fuente de verdad para color, tipografía, radios y sombras. */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Sora', 'Inter', ui-sans-serif, sans-serif;
+
+  --color-brand-50: #fff4ed;
+  --color-brand-100: #ffe5d4;
+  --color-brand-400: #ff7f4d;
+  --color-brand-500: #ff5a1f;
+  --color-brand-600: #e8440d;
+  --color-brand-700: #c0340b;
+
+  --color-ink-950: #0b0f19;
+  --color-ink-900: #111827;
+  --color-ink-800: #1f2937;
+
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-line: var(--line);
+
+  --color-success: #12a150;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+
+  --radius-card: 1.25rem;
+  --shadow-card: 0 1px 2px rgb(11 15 25 / 0.04), 0 8px 24px -12px rgb(11 15 25 / 0.18);
+  --shadow-lift: 0 2px 4px rgb(11 15 25 / 0.06), 0 24px 48px -20px rgb(11 15 25 / 0.35);
+}
+
+:root {
+  --surface: #f7f7f5;
+  --surface-raised: #ffffff;
+  --surface-sunken: #eeeeea;
+  --fg: #0b0f19;
+  --fg-muted: #5b6170;
+  --line: #e4e4df;
+  --chart: #e8440d;
+}
+
+.dark {
+  --surface: #0b0f19;
+  --surface-raised: #131a29;
+  --surface-sunken: #070a12;
+  --fg: #f3f4f6;
+  --fg-muted: #9aa1b1;
+  --line: #222b3d;
+  --chart: #ff5a1f;
+}
