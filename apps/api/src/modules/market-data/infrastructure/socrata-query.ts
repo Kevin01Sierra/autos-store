@@ -24,3 +24,7 @@ export function buildSocrataQuery(url: string, fields: SocrataFields): string {
   if (fields.where) query.set('$where', fields.where);
   return `${url}?${query.toString()}`;
 }
+
+/** Limpia un valor pegado en el panel de Vercel: espacios y comillas o backticks envolventes. */
+export const cleanSetting = (value?: string): string | undefined =>
+  value?.trim().replace(/^([`'"])(.*)\1$/s, '$2').trim() || undefined;
