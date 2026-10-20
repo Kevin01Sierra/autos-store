@@ -27,6 +27,7 @@ describe('Consulta a datos.gov.co (Socrata)', () => {
   it('limpia valores pegados con comillas o backticks sin romper el SoQL', () => {
     expect(cleanSetting(' `https://x.co/a.json` ')).toBe('https://x.co/a.json');
     expect(cleanSetting("marca = 'KIA'")).toBe("marca = 'KIA'");
+    expect(cleanSetting("clase in(‘AUTOMOVIL','CAMPERO’)")).toBe("clase in('AUTOMOVIL','CAMPERO')");
     expect(cleanSetting('  ')).toBeUndefined();
   });
 
