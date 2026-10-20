@@ -41,3 +41,14 @@ export const modelUnits = (units: Map<string, number>, brand: string, model: str
   }
   return total;
 };
+
+/** Suma las filas que quedan iguales tras normalizar ("SPARK GT" y "Spark  Gt"). */
+export const mergeRecords = (records: MarketRecord[]): MarketRecord[] => {
+  const merged = new Map<string, MarketRecord>();
+  for (const r of records) {
+    const key = [r.brand, r.model, r.color ?? '', r.period, r.source].join('|');
+    const prev = merged.get(key);
+    merged.set(key, prev ? { ...prev, units: prev.units + r.units } : r);
+  }
+  return [...merged.values()];
+};

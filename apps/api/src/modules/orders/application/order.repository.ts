@@ -15,7 +15,14 @@ export interface OrderRepository {
   findById(id: string): Promise<OrderDto | null>;
   findByCustomer(customerId: string): Promise<OrderDto[]>;
   findAll(): Promise<OrderDto[]>;
-  changeStatus(id: string, status: OrderStatus, releaseStock: boolean): Promise<OrderDto>;
+  /** Falla con ConflictError si el pedido ya no está en `from` (otro cambio llegó antes). */
+  changeStatus(id: string, change: StatusChange): Promise<OrderDto>;
+}
+
+export interface StatusChange {
+  from: OrderStatus;
+  to: OrderStatus;
+  releaseStock: boolean;
 }
 
 export const ORDER_REPOSITORY = Symbol('ORDER_REPOSITORY');

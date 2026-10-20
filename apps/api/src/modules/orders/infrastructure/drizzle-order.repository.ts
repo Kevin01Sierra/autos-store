@@ -1,9 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { OrderDto, OrderStatus } from '@autos/contracts';
-import { eq } from 'drizzle-orm';
+import type { OrderDto } from '@autos/contracts';
+import { and, eq } from 'drizzle-orm';
 import { DATABASE, type Database } from '../../../shared/database/database.tokens.js';
 import { orderItems, orders } from '../../../shared/database/schema/index.js';
-import type { NewOrderLine, OrderRepository } from '../application/order.repository.js';
+import { ConflictError } from '../../../shared/domain/domain-errors.js';
+import type {
+  NewOrderLine, OrderRepository, StatusChange,
+} from '../application/order.repository.js';
 import { byCustomer, byId, loadOrders } from './order.mapper.js';
 import { moveStock } from './stock-movement.js';
 
@@ -36,9 +39,12 @@ export class DrizzleOrderRepository implements OrderRepository {
     return loadOrders(this.db);
   }
 
-  async changeStatus(id: string, status: OrderStatus, releaseStock: boolean): Promise<OrderDto> {
+  /** El UPDATE solo aplica si el estado no cambió desde que se leyó (sin carreras). */
+  async changeStatus(id: string, { from, to, releaseStock }: StatusChange): Promise<OrderDto> {
     await this.db.transaction(async (tx) => {
-      await tx.update(orders).set({ status }).where(byId(id));
+      const rows = await tx.update(orders).set({ status: to })
+        .where(and(byId(id), eq(orders.status, from))).returning({ id: orders.id });
+      if (rows.length === 0) throw new ConflictError('El pedido cambió mientras lo editabas, recarga');
       if (!releaseStock) return;
       const items = await tx.select().from(orderItems).where(eq(orderItems.orderId, id));
       for (const item of items) await moveStock(tx, item.vehicleId, item.quantity);
