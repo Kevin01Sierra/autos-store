@@ -34,7 +34,9 @@ export class OrdersService {
       throw new ForbiddenError('Solo puedes cancelar tus pedidos');
     }
     const next = OrderStateFactory.of(order.status).transitionTo(target);
-    const updated = await this.orders.changeStatus(id, next.status, next.releasesStock);
+    const updated = await this.orders.changeStatus(id, {
+      from: order.status, to: next.status, releaseStock: next.releasesStock,
+    });
     this.events.emit(OrderStatusChangedEvent.NAME, new OrderStatusChangedEvent(id, next.status));
     return updated;
   }

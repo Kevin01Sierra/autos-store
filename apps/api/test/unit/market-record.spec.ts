@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  monthStart, normalizeName, popularityKey,
+  mergeRecords, monthStart, normalizeName, popularityKey,
 } from '../../src/modules/market-data/domain/market-record.js';
 import { ResilientMarketSource } from '../../src/modules/market-data/infrastructure/resilient-market.source.js';
 
@@ -14,6 +14,11 @@ describe('Normalización de datos de mercado', () => {
   it('lleva cualquier fecha al primer día del mes', () => {
     expect(monthStart('2026-09-17T10:00:00.000')).toBe('2026-09-01');
     expect(monthStart('no es fecha')).toBeNull();
+  });
+
+  it('suma las filas que quedan repetidas tras normalizar', () => {
+    const row = { brand: 'Chevrolet', model: 'Spark Gt', color: null, period: '2020-01-01', source: 'x' };
+    expect(mergeRecords([{ ...row, units: 2 }, { ...row, units: 3 }])).toEqual([{ ...row, units: 5 }]);
   });
 
   it('genera claves sin importar mayúsculas', () => {

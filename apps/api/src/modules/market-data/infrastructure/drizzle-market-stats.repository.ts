@@ -4,7 +4,7 @@ import { and, desc, eq, ilike, sql, sum } from 'drizzle-orm';
 import { DATABASE, type Database } from '../../../shared/database/database.tokens.js';
 import { marketStats } from '../../../shared/database/schema/index.js';
 import type { MarketStatsRepository, TopModelsQuery } from '../application/market-data.ports.js';
-import { popularityKey, type MarketRecord } from '../domain/market-record.js';
+import { mergeRecords, popularityKey, type MarketRecord } from '../domain/market-record.js';
 
 const units = sql<number>`${sum(marketStats.units)}::int`;
 
@@ -12,19 +12,19 @@ const units = sql<number>`${sum(marketStats.units)}::int`;
 export class DrizzleMarketStatsRepository implements MarketStatsRepository {
   constructor(@Inject(DATABASE) private readonly db: Database) {}
 
+  /** Reemplaza la demo y guarda los datos reales en una sola transacción. */
   async upsertMany(records: MarketRecord[]): Promise<number> {
     if (records.length === 0) return 0;
-    // Con datos reales, los de demostración del seed dejan de tener sentido.
-    await this.db.delete(marketStats).where(eq(marketStats.source, 'demo'));
-    await this.db
-      .insert(marketStats)
-      .values(records)
-      .onConflictDoUpdate({
+    const rows = mergeRecords(records);
+    await this.db.transaction(async (tx) => {
+      await tx.delete(marketStats).where(eq(marketStats.source, 'demo'));
+      await tx.insert(marketStats).values(rows).onConflictDoUpdate({
         target: [marketStats.brand, marketStats.model, marketStats.color,
           marketStats.period, marketStats.source],
         set: { units: sql`excluded.units` },
       });
-    return records.length;
+    });
+    return rows.length;
   }
 
   async topModels({ brand, color, limit }: TopModelsQuery): Promise<MarketInsightDto[]> {
