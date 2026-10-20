@@ -2,7 +2,7 @@
 
 Prueba técnica full stack (backend, frontend y DevOps). Catálogo, inventario con stock,
 compras, panel de administración y un motor de recomendaciones que combina las preferencias
-del usuario con **matrículas reales del mercado colombiano (RUNT, datos.gov.co)** y con las
+del usuario con **el parque automotor real registrado en Colombia (datos.gov.co)** y con las
 ventas de la propia tienda.
 
 ![Inicio](docs/screenshots/home.jpg)

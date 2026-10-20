@@ -8,8 +8,10 @@ export const envSchema = z.object({
   MARKET_DATASET_URL: z.url().optional(),
   MARKET_FIELD_BRAND: z.string().default('marca'),
   MARKET_FIELD_MODEL: z.string().default('linea'),
-  MARKET_FIELD_COLOR: z.string().default('color'),
-  MARKET_FIELD_PERIOD: z.string().default('fecha_matricula'),
+  MARKET_FIELD_COLOR: z.string().optional(),
+  MARKET_FIELD_PERIOD: z.string().default('modelo'),
+  MARKET_PERIOD_TYPE: z.enum(['year', 'date']).default('year'),
+  MARKET_WHERE: z.string().optional(),
   PORT: z.coerce.number().default(3000),
 });
 

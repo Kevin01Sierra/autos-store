@@ -1,6 +1,9 @@
 import type { MarketInsightDto } from '@autos/contracts';
 import { formatNumber } from '@/shared/lib/format';
 
+/** Si la fuente publica años (año modelo), el periodo llega como 1 de enero: se muestra solo el año. */
+const formatPeriod = (period: string) => (period.endsWith('-01-01') ? period.slice(0, 4) : period.slice(0, 7));
+
 export function MarketTable({ rows }: { rows: MarketInsightDto[] }) {
   return (
     <div className="overflow-x-auto">
@@ -20,7 +23,7 @@ export function MarketTable({ rows }: { rows: MarketInsightDto[] }) {
               <td className="px-3 py-2 font-medium">{r.model}</td>
               <td className="px-3 py-2">{r.color ?? '—'}</td>
               <td className="tabular px-3 py-2">{formatNumber(r.units)}</td>
-              <td className="px-3 py-2 text-fg-muted">{r.period.slice(0, 7)}</td>
+              <td className="px-3 py-2 text-fg-muted">{formatPeriod(r.period)}</td>
             </tr>
           ))}
         </tbody>

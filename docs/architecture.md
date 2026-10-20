@@ -10,7 +10,7 @@ flowchart LR
   api --> db[(Supabase Postgres)]
   api -- verifica JWT con JWKS --> auth
   cron[GitHub Actions<br/>cron semanal] -- POST /market/sync --> api
-  api -- SoQL --> runt[(datos.gov.co<br/>RUNT)]
+  api -- SoQL --> runt[(datos.gov.co<br/>parque automotor)]
 ```
 
 ## Capas de cada módulo (arquitectura hexagonal)
@@ -65,7 +65,7 @@ sequenceDiagram
 flowchart LR
   prefs[Preferencias del usuario] --> factory[Factory Method]
   factory --> composite[WeightedCompositeStrategy]
-  composite --> m[MarketPopularity<br/>matrículas RUNT]
+  composite --> m[MarketPopularity<br/>parque automotor real]
   composite --> s[StoreSales<br/>ventas internas]
   composite --> p[PreferenceMatch<br/>marca, modelo, color, presupuesto]
   composite --> out[Puntaje 0..1 + motivos legibles]
