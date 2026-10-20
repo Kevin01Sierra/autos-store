@@ -81,6 +81,12 @@ supabase        migraciones, RLS y seed
 docs            arquitectura, patrones, ADRs, despliegue y herramientas
 ```
 
+## Modelo de datos
+
+![Diagrama relacional de la base de datos](docs/diagrams/modelo-relacional.png)
+
+Detalle de relaciones en [docs/architecture.md](docs/architecture.md#modelo-de-datos).
+
 ## Despliegue
 
 Guía paso a paso para Supabase y Vercel en plan gratuito: [docs/deploy.md](docs/deploy.md).

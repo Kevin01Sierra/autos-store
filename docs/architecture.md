@@ -91,6 +91,11 @@ erDiagram
   market_stats }o..o{ models : "se cruza por marca+modelo+color"
 ```
 
+Diagrama relacional completo, exportado del visualizador de esquemas de Supabase, con columnas,
+tipos y llaves foráneas (incluye `profiles.id → auth.users.id`):
+
+![Diagrama relacional de la base de datos](diagrams/modelo-relacional.png)
+
 Para diagramas interactivos (rutas, foco upstream/downstream, exportar PNG/PDF) se usa
 [Archify](https://github.com/tt-a1i/archify): `npx skills add tt-a1i/archify -g` y luego
 pedir en Claude Code "mapea la arquitectura de este repositorio".
