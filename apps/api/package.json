@@ -1,0 +1,38 @@
+{
+  "name": "@autos/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "node --watch --env-file-if-exists=.env --import @swc-node/register/esm-register src/main.ts",
+    "start": "node --env-file-if-exists=.env dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@autos/contracts": "workspace:*",
+    "@nestjs/common": "^12.2.0",
+    "@nestjs/config": "^12.0.1",
+    "@nestjs/core": "^12.2.0",
+    "@nestjs/event-emitter": "^12.0.1",
+    "@nestjs/platform-express": "^12.2.0",
+    "@nestjs/swagger": "^12.0.2",
+    "drizzle-orm": "^0.45.4",
+    "jose": "^6.2.12",
+    "postgres": "^3.4.9",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^12.2.0",
+    "@swc-node/register": "^1.11.0",
+    "@swc/core": "^1.16.18",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "unplugin-swc": "^2.0.0",
+    "vitest": "^5.0.5"
+  }
+}

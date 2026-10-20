@@ -1,0 +1,24 @@
+name: Tareas programadas
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # lunes 06:00 UTC: sincroniza datos de mercado
+    - cron: '0 12 */3 * *' # cada 3 días: evita que Supabase (plan gratuito) pause el proyecto
+  workflow_dispatch:
+
+jobs:
+  market-sync:
+    if: github.event.schedule == '0 6 * * 1' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sincronizar datos de mercado (datos.gov.co)
+        run: |
+          curl --fail-with-body -X POST "${{ secrets.API_URL }}/market/sync" \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
+
+  keep-alive:
+    if: github.event.schedule == '0 12 */3 * *'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping de salud (consulta la base de datos)
+        run: curl --fail-with-body "${{ secrets.API_URL }}/health"

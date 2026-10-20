@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, tipos, pruebas y build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Regla de 60 líneas por archivo
+        run: pnpm check:lines
+      - run: pnpm turbo run lint typecheck test build
+
+  e2e:
+    name: End-to-end (Playwright)
+    runs-on: ubuntu-latest
+    needs: quality
+    services:
+      postgres:
+        image: postgres:17
+        env: { POSTGRES_PASSWORD: postgres }
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      SUPABASE_URL: https://example.supabase.co
+      CRON_SECRET: ci-secret-value
+      CORS_ORIGINS: http://localhost:4173
+      VITE_API_URL: http://localhost:3000/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: scripts/db-setup.sh
+      - run: pnpm turbo run build --filter=@autos/api --filter=@autos/web
+      - name: Levantar API y web
+        run: |
+          (cd apps/api && node dist/main.js &) && (cd apps/web && pnpm preview --port 4173 &)
+          npx wait-on -t 60000 http://localhost:3000/api/health http://localhost:4173
+      - run: pnpm --filter @autos/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @autos/web e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: playwright-report, path: apps/web/playwright-report }
