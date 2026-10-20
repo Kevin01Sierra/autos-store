@@ -13,7 +13,7 @@ export class StoreSalesStrategy implements RecommendationStrategy {
     const units = salesUnits.get(salesKey(vehicle.modelId, vehicle.colorId)) ?? 0;
     if (units === 0) return { score: 0 };
     return {
-      score: normalize(units, salesUnits.values()),
+      score: normalize(units, salesUnits),
       reason: `${units} ${units === 1 ? 'compra' : 'compras'} en nuestra tienda`,
     };
   }

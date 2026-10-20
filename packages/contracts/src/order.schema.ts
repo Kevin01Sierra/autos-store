@@ -7,7 +7,10 @@ export const purchaseSchema = z.object({
   items: z
     .array(z.object({ vehicleId: z.uuid(), quantity: z.number().int().min(1).max(3) }))
     .min(1)
-    .max(5),
+    .max(5)
+    .refine((items) => new Set(items.map((i) => i.vehicleId)).size === items.length, {
+      message: 'No repitas un vehículo: ajusta su cantidad',
+    }),
 });
 
 export const changeOrderStatusSchema = z.object({ status: z.enum(ORDER_STATUSES) });

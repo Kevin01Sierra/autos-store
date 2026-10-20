@@ -33,11 +33,10 @@ export class AuthGuard implements CanActivate {
   private async authenticate(header?: string): Promise<AuthUser> {
     const token = header?.startsWith('Bearer ') ? header.slice(7) : undefined;
     if (!token) throw new UnauthorizedException('Falta el token de acceso');
-    try {
-      const { userId, email } = await this.verifier.verify(token);
-      return { id: userId, email, role: await this.roles.roleOf(userId) };
-    } catch {
+    // Solo un token inválido es 401; si falla la lectura del rol, el error sigue siendo 500.
+    const { userId, email } = await this.verifier.verify(token).catch(() => {
       throw new UnauthorizedException('Token inválido o expirado');
-    }
+    });
+    return { id: userId, email, role: await this.roles.roleOf(userId) };
   }
 }

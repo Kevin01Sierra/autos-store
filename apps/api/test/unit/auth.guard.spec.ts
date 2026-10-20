@@ -3,12 +3,14 @@ import { Reflector } from '@nestjs/core';
 import { describe, expect, it, vi } from 'vitest';
 import { AuthGuard } from '../../src/shared/auth/auth.guard.js';
 
-function setup(role: 'admin' | 'customer', required: string[] = []) {
+function setup(role: 'admin' | 'customer' | Error, required: string[] = []) {
   const verifier = { verify: vi.fn(async (token: string) => {
     if (token !== 'valido') throw new Error('firma inválida');
     return { userId: 'user-1' };
   }) };
-  const roles = { roleOf: vi.fn().mockResolvedValue(role) };
+  const roles = {
+    roleOf: vi.fn(async () => { if (role instanceof Error) throw role; return role; }),
+  };
   const reflector = { getAllAndOverride: vi.fn().mockReturnValue(required) } as unknown as Reflector;
   const guard = new AuthGuard(reflector, verifier, roles);
   const run = (authorization?: string) => {
@@ -40,5 +42,10 @@ describe('AuthGuard', () => {
     await expect(run('Bearer valido')).resolves.toEqual({
       ok: true, user: { id: 'user-1', email: undefined, role: 'admin' },
     });
+  });
+
+  it('una caída de la base no se disfraza de token inválido', async () => {
+    const { run } = setup(new Error('conexión perdida'));
+    await expect(run('Bearer valido')).rejects.toThrow('conexión perdida');
   });
 });
