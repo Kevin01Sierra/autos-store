@@ -1,5 +1,7 @@
 # Herramientas de desarrollo con IA
 
+En las sesiones de Claude Code en la nube, `.claude/hooks/session-start.sh` instala automáticamente las dependencias, agent-skills, Ponytail, Graphify y Archify. En local, sigue la columna "Cómo se activa".
+
 | Herramienta | Para qué la usamos | Cómo se activa |
 |---|---|---|
 | [agent-skills](https://github.com/addyosmani/agent-skills) | Flujo spec → plan → build → test → review → ship; skills de frontend/UI, API, TDD, CI/CD, seguridad. | Ya declarado en `.claude/settings.json`; Claude Code ofrece instalarlo al abrir el repo. |
