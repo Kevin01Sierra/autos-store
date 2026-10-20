@@ -1,0 +1,143 @@
+{
+  "schema_version": 3,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Ciclo de vida: vehículo en inventario",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/ciclo-vehiculo.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "mainPath": [
+    "registered",
+    "draft",
+    "published",
+    "archived"
+  ],
+  "states": [
+    {
+      "id": "registered",
+      "type": "start",
+      "label": "Registro",
+      "sublabel": "POST /api/vehicles",
+      "step": "01",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/vehicles/application/vehicles.service.ts",
+          "line": 27,
+          "end_line": 33
+        }
+      ]
+    },
+    {
+      "id": "draft",
+      "type": "waiting",
+      "label": "Borrador",
+      "sublabel": "espera aprobación",
+      "tag": "draft",
+      "step": "02"
+    },
+    {
+      "id": "published",
+      "type": "success",
+      "label": "Publicado",
+      "sublabel": "visible y comprable",
+      "tag": "published",
+      "step": "03",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/vehicles/presentation/vehicles.controller.ts",
+          "line": 19,
+          "end_line": 22,
+          "label": "catálogo público"
+        }
+      ]
+    },
+    {
+      "id": "archived",
+      "type": "neutral",
+      "label": "Archivado",
+      "sublabel": "borrado lógico",
+      "tag": "archived",
+      "step": "04",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/vehicles/infrastructure/drizzle-vehicle.repository.ts",
+          "line": 53,
+          "end_line": 57
+        }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "id": "registered-draft",
+      "from": "registered",
+      "to": "draft",
+      "label": "lo publica un cliente"
+    },
+    {
+      "id": "draft-published",
+      "from": "draft",
+      "to": "published",
+      "label": "admin aprueba",
+      "variant": "emphasis"
+    },
+    {
+      "id": "published-archived",
+      "from": "published",
+      "to": "archived",
+      "label": "admin archiva"
+    },
+    {
+      "id": "registered-published",
+      "from": "registered",
+      "to": "published",
+      "label": "lo publica un admin",
+      "variant": "emphasis"
+    },
+    {
+      "id": "draft-archived",
+      "from": "draft",
+      "to": "archived",
+      "label": "admin descarta"
+    },
+    {
+      "id": "archived-published",
+      "from": "archived",
+      "to": "published",
+      "label": "PATCH status",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Quién mueve el estado",
+      "items": [
+        "Un cliente puede vender su auto, pero queda en borrador hasta que un admin lo apruebe.",
+        "Aprobar, archivar y reactivar son PATCH o DELETE con @Auth('admin')."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Stock",
+      "items": [
+        "El stock no es un estado: un vehículo publicado con stock 0 sigue publicado, pero el filtro de disponibles lo oculta y la compra falla con 422.",
+        "Archivar no borra la fila, porque order_items la referencia (on delete restrict)."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Visibilidad",
+      "items": [
+        "El catálogo público y la política RLS solo muestran vehículos con status = 'published'."
+      ]
+    }
+  ]
+}

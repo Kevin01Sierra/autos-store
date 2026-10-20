@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "diagram_type": "class",
+  "meta": {
+    "title": "Clases: reglas de compra (Chain of Responsibility y Value Object)",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/clases-validaciones.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "layout": {
+    "mode": "grid"
+  },
+  "types": [
+    {
+      "id": "base",
+      "label": "PurchaseValidator",
+      "kind": "abstract",
+      "sublabel": "eslabón de la cadena",
+      "row": 0,
+      "col": 1,
+      "attributes": [
+        {
+          "name": "nextValidator",
+          "visibility": "private",
+          "type": "PurchaseValidator?"
+        }
+      ],
+      "methods": [
+        {
+          "name": "setNext",
+          "visibility": "public",
+          "parameters": "validator",
+          "returns": "PurchaseValidator"
+        },
+        {
+          "name": "validate",
+          "visibility": "public",
+          "parameters": "context",
+          "returns": "void"
+        },
+        {
+          "name": "check",
+          "visibility": "protected",
+          "parameters": "context",
+          "returns": "void",
+          "abstract": true
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/validation/purchase-validator.ts",
+          "line": 3,
+          "end_line": 21
+        }
+      ]
+    },
+    {
+      "id": "quantity",
+      "label": "QuantityLimitValidator",
+      "kind": "class",
+      "sublabel": "1 · máximo 5 unidades",
+      "row": 1,
+      "col": 0,
+      "methods": [
+        {
+          "name": "check",
+          "visibility": "protected",
+          "parameters": "context",
+          "returns": "void"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/validation/purchase-validators.ts",
+          "line": 34,
+          "end_line": 45
+        }
+      ],
+      "attributes": [
+        {
+          "name": "maxUnits",
+          "visibility": "private",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "id": "published",
+      "label": "PublishedVehicleValidator",
+      "kind": "class",
+      "sublabel": "2 · solo publicados",
+      "row": 1,
+      "col": 1,
+      "methods": [
+        {
+          "name": "check",
+          "visibility": "protected",
+          "parameters": "context",
+          "returns": "void"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/validation/purchase-validators.ts",
+          "line": 6,
+          "end_line": 11
+        }
+      ]
+    },
+    {
+      "id": "own",
+      "label": "OwnVehicleValidator",
+      "kind": "class",
+      "sublabel": "3 · no comprar lo propio",
+      "row": 1,
+      "col": 2,
+      "methods": [
+        {
+          "name": "check",
+          "visibility": "protected",
+          "parameters": "context",
+          "returns": "void"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/validation/purchase-validators.ts",
+          "line": 13,
+          "end_line": 19
+        }
+      ]
+    },
+    {
+      "id": "price",
+      "label": "CurrentPriceValidator",
+      "kind": "class",
+      "sublabel": "4 · precio vigente > 0",
+      "row": 2,
+      "col": 0,
+      "methods": [
+        {
+          "name": "check",
+          "visibility": "protected",
+          "parameters": "context",
+          "returns": "void"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/validation/purchase-validators.ts",
+          "line": 27,
+          "end_line": 32
+        }
+      ]
+    },
+    {
+      "id": "stock",
+      "label": "StockAvailableValidator",
+      "kind": "class",
+      "sublabel": "5 · stock suficiente",
+      "row": 2,
+      "col": 2,
+      "methods": [
+        {
+          "name": "check",
+          "visibility": "protected",
+          "parameters": "context",
+          "returns": "void"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/validation/purchase-validators.ts",
+          "line": 21,
+          "end_line": 25
+        }
+      ]
+    },
+    {
+      "id": "vo",
+      "label": "Stock",
+      "kind": "class",
+      "sublabel": "Value Object inmutable",
+      "row": 2,
+      "col": 1,
+      "attributes": [
+        {
+          "name": "units",
+          "visibility": "public",
+          "type": "number"
+        }
+      ],
+      "methods": [
+        {
+          "name": "of",
+          "visibility": "public",
+          "parameters": "units",
+          "returns": "Stock",
+          "static": true
+        },
+        {
+          "name": "canReserve",
+          "visibility": "public",
+          "parameters": "quantity",
+          "returns": "boolean"
+        },
+        {
+          "name": "reserve",
+          "visibility": "public",
+          "parameters": "quantity",
+          "returns": "Stock"
+        },
+        {
+          "name": "adjust",
+          "visibility": "public",
+          "parameters": "delta",
+          "returns": "Stock"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/vehicles/domain/stock.ts",
+          "line": 3,
+          "end_line": 28
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "quantity-base",
+      "from": "quantity",
+      "to": "base",
+      "kind": "inheritance"
+    },
+    {
+      "id": "published-base",
+      "from": "published",
+      "to": "base",
+      "kind": "inheritance"
+    },
+    {
+      "id": "own-base",
+      "from": "own",
+      "to": "base",
+      "kind": "inheritance"
+    },
+    {
+      "id": "price-base",
+      "from": "price",
+      "to": "base",
+      "kind": "inheritance"
+    },
+    {
+      "id": "stock-base",
+      "from": "stock",
+      "to": "base",
+      "kind": "inheritance"
+    },
+    {
+      "id": "stock-vo",
+      "from": "stock",
+      "to": "vo",
+      "kind": "dependency",
+      "label": "reserve()"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Orden de la cadena",
+      "items": [
+        "createPurchaseChain arma: cantidad → publicado → propio → precio → stock.",
+        "El primer validador que falla lanza BusinessRuleError y la API responde 422 sin tocar la base de datos.",
+        "Agregar una regla es crear una subclase y encadenarla; PurchaseFacade no cambia."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Value Object",
+      "items": [
+        "Stock nunca queda negativo: of() rechaza valores inválidos y reserve() devuelve un Stock nuevo en vez de mutar."
+      ]
+    }
+  ]
+}

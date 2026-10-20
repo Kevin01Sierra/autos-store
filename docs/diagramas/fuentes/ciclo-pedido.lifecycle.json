@@ -1,0 +1,185 @@
+{
+  "schema_version": 3,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Ciclo de vida: pedido",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/ciclo-pedido.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "mainPath": [
+    "requested",
+    "pending",
+    "paid",
+    "delivered"
+  ],
+  "states": [
+    {
+      "id": "requested",
+      "type": "start",
+      "label": "Compra solicitada",
+      "sublabel": "POST /api/orders",
+      "step": "01",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/application/purchase.facade.ts",
+          "line": 26,
+          "end_line": 39
+        }
+      ]
+    },
+    {
+      "id": "pending",
+      "type": "waiting",
+      "label": "Pendiente",
+      "sublabel": "stock ya descontado",
+      "tag": "pending",
+      "step": "02",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/order-state.ts",
+          "line": 24,
+          "end_line": 27
+        }
+      ]
+    },
+    {
+      "id": "paid",
+      "type": "active",
+      "label": "Pagado",
+      "sublabel": "pago confirmado",
+      "tag": "paid",
+      "step": "03",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/order-state.ts",
+          "line": 29,
+          "end_line": 32
+        }
+      ]
+    },
+    {
+      "id": "delivered",
+      "type": "success",
+      "label": "Entregado",
+      "sublabel": "estado final",
+      "tag": "delivered",
+      "step": "04",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/order-state.ts",
+          "line": 34,
+          "end_line": 37
+        }
+      ]
+    },
+    {
+      "id": "rejected",
+      "type": "failure",
+      "label": "Rechazada",
+      "sublabel": "no se crea el pedido",
+      "tag": "422",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/validation/purchase-validators.ts",
+          "line": 6,
+          "end_line": 45
+        }
+      ]
+    },
+    {
+      "id": "cancelled",
+      "type": "neutral",
+      "label": "Cancelado",
+      "sublabel": "stock devuelto",
+      "tag": "cancelled",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/order-state.ts",
+          "line": 39,
+          "end_line": 45
+        },
+        {
+          "path": "apps/api/src/modules/orders/infrastructure/drizzle-order.repository.ts",
+          "line": 39,
+          "end_line": 47,
+          "label": "libera stock"
+        }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "id": "requested-pending",
+      "from": "requested",
+      "to": "pending",
+      "label": "validación + COMMIT",
+      "variant": "emphasis"
+    },
+    {
+      "id": "pending-paid",
+      "from": "pending",
+      "to": "paid",
+      "label": "admin confirma pago"
+    },
+    {
+      "id": "paid-delivered",
+      "from": "paid",
+      "to": "delivered",
+      "label": "admin entrega",
+      "variant": "emphasis"
+    },
+    {
+      "id": "requested-rejected",
+      "from": "requested",
+      "to": "rejected",
+      "label": "regla incumplida",
+      "variant": "security"
+    },
+    {
+      "id": "pending-cancelled",
+      "from": "pending",
+      "to": "cancelled",
+      "label": "cancelar",
+      "note": "cliente dueño o admin"
+    },
+    {
+      "id": "paid-cancelled",
+      "from": "paid",
+      "to": "cancelled",
+      "label": "cancelar",
+      "note": "cliente dueño o admin"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Reglas",
+      "items": [
+        "Cada estado declara sus destinos (patrón State); un cambio no permitido, como entregado → pagado, responde 422.",
+        "El cliente solo puede cancelar sus propios pedidos; pagar y entregar son acciones del admin (PATCH /api/orders/:id/status)."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Stock",
+      "items": [
+        "El stock se descuenta al crear el pedido, dentro de la misma transacción.",
+        "Cancelar devuelve las unidades; entregado y cancelado son estados finales."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Eventos",
+      "items": [
+        "Cada cambio emite order.status-changed y las ventas internas se recalculan sin contar los pedidos cancelados."
+      ]
+    }
+  ]
+}

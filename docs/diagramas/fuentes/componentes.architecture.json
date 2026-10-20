@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Rueda: componentes de la API (módulos NestJS)",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/componentes.html",
+    "quality_profile": "showcase",
+    "repository": { "url": "https://github.com/Kevin01Sierra/autos-store", "provider": "github", "link_mode": "web", "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4" }
+  },
+  "components": [
+    { "id": "brands", "type": "backend", "label": "BrandsModule", "sublabel": "CRUD de marcas", "pos": [270, 40], "size": [170, 64],
+      "sources": [{ "path": "apps/api/src/modules/brands/brands.module.ts", "line": 7, "end_line": 12 }] },
+    { "id": "models", "type": "backend", "label": "ModelsModule", "sublabel": "CRUD de modelos", "pos": [500, 40], "size": [170, 64],
+      "sources": [{ "path": "apps/api/src/modules/models/models.module.ts", "line": 8, "end_line": 14 }] },
+    { "id": "colors", "type": "backend", "label": "ColorsModule", "sublabel": "CRUD de colores", "pos": [730, 40], "size": [170, 64],
+      "sources": [{ "path": "apps/api/src/modules/colors/colors.module.ts", "line": 7, "end_line": 12 }] },
+    { "id": "admin", "type": "backend", "label": "AdminModule", "sublabel": "métricas (CQRS)", "pos": [1000, 40], "size": [170, 64],
+      "sources": [{ "path": "apps/api/src/modules/admin/admin.module.ts", "line": 1, "end_line": 6 }, { "path": "apps/api/src/modules/admin/admin-metrics.query.ts", "line": 13, "end_line": 30 }] },
+    { "id": "web", "type": "frontend", "label": "Web SPA", "sublabel": "ServicesProvider", "pos": [30, 200], "size": [160, 64],
+      "sources": [{ "path": "apps/web/src/shared/api/services.ts", "line": 11, "end_line": 25 }] },
+    { "id": "vehicles", "type": "backend", "label": "VehiclesModule", "sublabel": "inventario y stock", "pos": [500, 200], "size": [170, 64], "tag": "núcleo",
+      "sources": [{ "path": "apps/api/src/modules/vehicles/vehicles.module.ts", "line": 9, "end_line": 15 }, { "path": "apps/api/src/modules/vehicles/application/vehicles.service.ts", "line": 10, "end_line": 46 }] },
+    { "id": "pricing", "type": "backend", "label": "PricingModule", "sublabel": "historial de precios", "pos": [730, 200], "size": [170, 64],
+      "sources": [{ "path": "apps/api/src/modules/pricing/pricing.module.ts", "line": 8, "end_line": 13 }] },
+    { "id": "database", "type": "backend", "label": "DatabaseModule", "sublabel": "@Global · token DATABASE", "pos": [1000, 200], "size": [170, 64],
+      "sources": [{ "path": "apps/api/src/shared/database/database.module.ts", "line": 12, "end_line": 29 }] },
+    { "id": "postgres", "type": "database", "label": "Supabase Postgres", "sublabel": "pooler · RLS", "pos": [1270, 200], "size": [170, 64] },
+    { "id": "orders", "type": "backend", "label": "OrdersModule", "sublabel": "compra y estados", "pos": [270, 360], "size": [170, 64],
+      "sources": [{ "path": "apps/api/src/modules/orders/orders.module.ts", "line": 9, "end_line": 18 }, { "path": "apps/api/src/modules/orders/application/purchase.facade.ts", "line": 15, "end_line": 39 }] },
+    { "id": "recs", "type": "backend", "label": "RecommendationsModule", "sublabel": "estrategias ponderadas", "pos": [730, 360], "size": [190, 64],
+      "sources": [{ "path": "apps/api/src/modules/recommendations/recommendations.module.ts", "line": 12, "end_line": 23 }, { "path": "apps/api/src/modules/recommendations/application/sales-stats.listener.ts", "line": 13, "end_line": 26 }] },
+    { "id": "market", "type": "backend", "label": "MarketDataModule", "sublabel": "Adapter + Decorator", "pos": [1000, 360], "size": [170, 64],
+      "sources": [{ "path": "apps/api/src/modules/market-data/market-data.module.ts", "line": 10, "end_line": 24 }] },
+    { "id": "runt", "type": "external", "label": "datos.gov.co", "sublabel": "Socrata (RUNT)", "pos": [1270, 360], "size": [170, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "API NestJS · AppModule", "wraps": ["brands", "models", "colors", "admin", "vehicles", "pricing", "database", "orders", "recs", "market"] }
+  ],
+  "connections": [
+    { "id": "web-vehicles", "from": "web", "to": "vehicles", "label": "GET /api/vehicles", "variant": "emphasis" },
+    { "id": "web-orders", "from": "web", "to": "orders", "label": "POST /api/orders", "variant": "emphasis", "fromSide": "bottom", "toSide": "left" },
+    { "id": "models-brands", "from": "models", "to": "brands", "label": "usa" },
+    { "id": "vehicles-models", "from": "vehicles", "to": "models", "label": "valida modelo" },
+    { "id": "vehicles-colors", "from": "vehicles", "to": "colors", "label": "valida color", "fromSide": "top", "toSide": "bottom" },
+    { "id": "pricing-vehicles", "from": "pricing", "to": "vehicles", "label": "usa" },
+    { "id": "orders-vehicles", "from": "orders", "to": "vehicles", "label": "carga vehículos", "fromSide": "top", "toSide": "bottom" },
+    { "id": "recs-vehicles", "from": "recs", "to": "vehicles", "label": "candidatos", "fromSide": "top", "toSide": "bottom" },
+    { "id": "orders-recs", "from": "orders", "to": "recs", "label": "evento order.placed", "variant": "dashed" },
+    { "id": "recs-market", "from": "recs", "to": "market", "label": "popularidad" },
+    { "id": "market-runt", "from": "market", "to": "runt", "label": "SoQL HTTPS" },
+    { "id": "admin-database", "from": "admin", "to": "database", "label": "SQL agregado" },
+    { "id": "database-postgres", "from": "database", "to": "postgres", "label": "postgres-js" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "Cómo se conectan", "items": [
+      "Cada flecha sólida es un import entre módulos de Nest: el módulo de origen usa un servicio exportado por el destino.",
+      "La flecha punteada es un evento de dominio: OrdersModule no conoce a RecommendationsModule; este escucha order.placed y order.status-changed.",
+      "Cada módulo enlaza sus puertos a adaptadores Drizzle en su *.module.ts con { provide: TOKEN, useClass }."
+    ] },
+    { "dot": "violet", "title": "Módulos globales", "items": [
+      "DatabaseModule entrega una sola conexión (token DATABASE) a todos los repositorios Drizzle; solo se dibuja la consulta directa de AdminModule.",
+      "AuthModule (global) registra AuthGuard, SupabaseTokenVerifier y ProfileRoleReader, que protegen los controladores de todos los módulos."
+    ] },
+    { "dot": "slate", "title": "Capas dentro de cada módulo", "items": [
+      "presentation: controlador + validación Zod de packages/contracts.",
+      "application: servicios, fachada y puertos (interfaces + tokens).",
+      "domain: reglas puras sin Nest ni Drizzle. infrastructure: adaptadores."
+    ] }
+  ]
+}

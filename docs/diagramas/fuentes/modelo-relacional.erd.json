@@ -1,0 +1,637 @@
+{
+  "schema_version": 1,
+  "diagram_type": "erd",
+  "meta": {
+    "title": "Modelo relacional de la base de datos",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/modelo-relacional.html",
+    "quality_profile": "standard",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "layout": {
+    "mode": "grid"
+  },
+  "entities": [
+    {
+      "id": "brands",
+      "label": "brands",
+      "tag": "catálogo",
+      "row": 0,
+      "col": 0,
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000100_catalog.sql",
+          "line": 4,
+          "end_line": 11
+        }
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "key": "pk"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "key": "uk"
+        },
+        {
+          "name": "slug",
+          "type": "text",
+          "key": "uk"
+        },
+        {
+          "name": "country",
+          "type": "text"
+        },
+        {
+          "name": "logo_url",
+          "type": "text"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "id": "models",
+      "label": "models",
+      "tag": "catálogo",
+      "row": 1,
+      "col": 0,
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000100_catalog.sql",
+          "line": 13,
+          "end_line": 22
+        }
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "key": "pk"
+        },
+        {
+          "name": "brand_id",
+          "type": "uuid",
+          "key": "fk",
+          "references": "brands.id"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "slug",
+          "type": "text",
+          "key": "uk"
+        },
+        {
+          "name": "body_type",
+          "type": "text"
+        },
+        {
+          "name": "fuel_type",
+          "type": "text"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "id": "colors",
+      "label": "colors",
+      "tag": "catálogo",
+      "row": 2,
+      "col": 0,
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000100_catalog.sql",
+          "line": 24,
+          "end_line": 28
+        }
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "key": "pk"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "key": "uk"
+        },
+        {
+          "name": "hex",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "vehicles",
+      "label": "vehicles",
+      "tag": "inventario",
+      "row": 0,
+      "col": 1,
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000200_inventory.sql",
+          "line": 9,
+          "end_line": 21
+        }
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "key": "pk"
+        },
+        {
+          "name": "model_id",
+          "type": "uuid",
+          "key": "fk",
+          "references": "models.id"
+        },
+        {
+          "name": "color_id",
+          "type": "uuid",
+          "key": "fk",
+          "references": "colors.id"
+        },
+        {
+          "name": "seller_id",
+          "type": "uuid",
+          "key": "fk",
+          "references": "profiles.id"
+        },
+        {
+          "name": "year",
+          "type": "int"
+        },
+        {
+          "name": "mileage_km",
+          "type": "int"
+        },
+        {
+          "name": "transmission",
+          "type": "text"
+        },
+        {
+          "name": "stock",
+          "type": "int"
+        },
+        {
+          "name": "status",
+          "type": "text"
+        },
+        {
+          "name": "image_urls",
+          "type": "text[]"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "id": "vehicle_prices",
+      "label": "vehicle_prices",
+      "tag": "inventario",
+      "row": 1,
+      "col": 1,
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000200_inventory.sql",
+          "line": 23,
+          "end_line": 34
+        }
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "key": "pk"
+        },
+        {
+          "name": "vehicle_id",
+          "type": "uuid",
+          "key": "fk",
+          "references": "vehicles.id"
+        },
+        {
+          "name": "amount",
+          "type": "numeric(14,2)"
+        },
+        {
+          "name": "currency",
+          "type": "text"
+        },
+        {
+          "name": "valid_from",
+          "type": "timestamptz"
+        },
+        {
+          "name": "valid_to",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "id": "orders",
+      "label": "orders",
+      "tag": "pedidos",
+      "row": 0,
+      "col": 2,
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000300_orders.sql",
+          "line": 2,
+          "end_line": 9
+        }
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "key": "pk"
+        },
+        {
+          "name": "customer_id",
+          "type": "uuid",
+          "key": "fk",
+          "references": "profiles.id"
+        },
+        {
+          "name": "status",
+          "type": "text"
+        },
+        {
+          "name": "total",
+          "type": "numeric(14,2)"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "id": "order_items",
+      "label": "order_items",
+      "tag": "pedidos",
+      "row": 1,
+      "col": 2,
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000300_orders.sql",
+          "line": 11,
+          "end_line": 17
+        }
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "key": "pk"
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "key": "fk",
+          "references": "orders.id"
+        },
+        {
+          "name": "vehicle_id",
+          "type": "uuid",
+          "key": "fk",
+          "references": "vehicles.id"
+        },
+        {
+          "name": "quantity",
+          "type": "int"
+        },
+        {
+          "name": "unit_price",
+          "type": "numeric(14,2)"
+        }
+      ]
+    },
+    {
+      "id": "profiles",
+      "label": "profiles",
+      "tag": "usuarios",
+      "row": 0,
+      "col": 3,
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000200_inventory.sql",
+          "line": 2,
+          "end_line": 7
+        },
+        {
+          "path": "supabase/migrations/20261020000500_security.sql",
+          "line": 24,
+          "end_line": 36,
+          "label": "trigger"
+        }
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "key": [
+            "pk",
+            "fk"
+          ],
+          "references": "auth_users.id"
+        },
+        {
+          "name": "full_name",
+          "type": "text"
+        },
+        {
+          "name": "role",
+          "type": "text"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "id": "user_preferences",
+      "label": "user_preferences",
+      "tag": "usuarios",
+      "row": 1,
+      "col": 3,
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000400_market.sql",
+          "line": 13,
+          "end_line": 20
+        }
+      ],
+      "attributes": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "key": [
+            "pk",
+            "fk"
+          ],
+          "references": "profiles.id"
+        },
+        {
+          "name": "brand_ids",
+          "type": "uuid[]"
+        },
+        {
+          "name": "model_ids",
+          "type": "uuid[]"
+        },
+        {
+          "name": "color_ids",
+          "type": "uuid[]"
+        },
+        {
+          "name": "max_budget",
+          "type": "numeric(14,2)"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz"
+        }
+      ]
+    },
+    {
+      "id": "auth_users",
+      "label": "auth.users",
+      "sublabel": "Supabase Auth",
+      "tag": "usuarios",
+      "row": 2,
+      "col": 3,
+      "attributes": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "key": "pk"
+        },
+        {
+          "name": "email",
+          "type": "text"
+        },
+        {
+          "name": "raw_user_meta_data",
+          "type": "jsonb"
+        }
+      ]
+    },
+    {
+      "id": "market_stats",
+      "label": "market_stats",
+      "tag": "mercado",
+      "row": 0,
+      "col": 4,
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000400_market.sql",
+          "line": 2,
+          "end_line": 11
+        }
+      ],
+      "attributes": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "key": "pk"
+        },
+        {
+          "name": "brand",
+          "type": "text",
+          "key": "uk"
+        },
+        {
+          "name": "model",
+          "type": "text",
+          "key": "uk"
+        },
+        {
+          "name": "color",
+          "type": "text",
+          "key": "uk"
+        },
+        {
+          "name": "period",
+          "type": "date",
+          "key": "uk"
+        },
+        {
+          "name": "units",
+          "type": "int"
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "key": "uk"
+        }
+      ]
+    },
+    {
+      "id": "sales_stats",
+      "label": "sales_stats",
+      "sublabel": "vista materializada",
+      "tag": "mercado",
+      "row": 1,
+      "col": 4,
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000400_market.sql",
+          "line": 22,
+          "end_line": 30
+        }
+      ],
+      "attributes": [
+        {
+          "name": "model_id",
+          "type": "uuid",
+          "key": "uk"
+        },
+        {
+          "name": "color_id",
+          "type": "uuid",
+          "key": "uk"
+        },
+        {
+          "name": "units",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "brand-models",
+      "from": "brands",
+      "to": "models",
+      "fromCardinality": "one",
+      "toCardinality": "many",
+      "label": "tiene"
+    },
+    {
+      "id": "model-vehicles",
+      "from": "models",
+      "to": "vehicles",
+      "fromCardinality": "one",
+      "toCardinality": "many",
+      "label": "se vende como"
+    },
+    {
+      "id": "color-vehicles",
+      "from": "colors",
+      "to": "vehicles",
+      "fromCardinality": "one",
+      "toCardinality": "many",
+      "label": "pinta"
+    },
+    {
+      "id": "vehicle-prices",
+      "from": "vehicles",
+      "to": "vehicle_prices",
+      "fromCardinality": "one",
+      "toCardinality": "many",
+      "label": "historial"
+    },
+    {
+      "id": "vehicle-items",
+      "from": "vehicles",
+      "to": "order_items",
+      "fromCardinality": "one",
+      "toCardinality": "many",
+      "label": "se vende en"
+    },
+    {
+      "id": "order-items",
+      "from": "orders",
+      "to": "order_items",
+      "fromCardinality": "one",
+      "toCardinality": "many",
+      "label": "contiene"
+    },
+    {
+      "id": "profile-orders",
+      "from": "profiles",
+      "to": "orders",
+      "fromCardinality": "one",
+      "toCardinality": "many",
+      "label": "compra"
+    },
+    {
+      "id": "profile-vehicles",
+      "from": "profiles",
+      "to": "vehicles",
+      "fromCardinality": "one",
+      "toCardinality": "many",
+      "toOptional": true,
+      "fromOptional": true,
+      "identifying": false,
+      "variant": "dashed",
+      "label": "publica (seller)"
+    },
+    {
+      "id": "profile-prefs",
+      "from": "profiles",
+      "to": "user_preferences",
+      "fromCardinality": "one",
+      "toCardinality": "one",
+      "toOptional": true,
+      "label": "prefiere"
+    },
+    {
+      "id": "auth-profile",
+      "from": "auth_users",
+      "to": "profiles",
+      "fromCardinality": "one",
+      "toCardinality": "one",
+      "label": "trigger crea"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Dominios",
+      "items": [
+        "Catálogo e inventario separan lo que es un modelo (Chevrolet Spark) de cada unidad a la venta, con su color, año y stock.",
+        "vehicle_prices guarda el historial: un índice único parcial garantiza un solo precio vigente (valid_to is null) por vehículo."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Mercado, a propósito sin llaves",
+      "items": [
+        "market_stats copia datos externos del RUNT con marca y modelo en texto; no apunta a models porque el mercado incluye miles de modelos que la tienda no vende.",
+        "sales_stats es una vista materializada (sin llaves foráneas) que suma ventas no canceladas por modelo y color."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Integridad",
+      "items": [
+        "on delete restrict en order_items y orders: no se puede borrar un vehículo o cliente con compras; los vehículos se archivan.",
+        "Restricciones check: stock >= 0, cantidades > 0, precios > 0 y estados válidos."
+      ]
+    }
+  ]
+}

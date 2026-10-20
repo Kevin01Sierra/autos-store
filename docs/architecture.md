@@ -1,5 +1,9 @@
 # Arquitectura
 
+> Versiones interactivas de estos diagramas (y de clases, secuencias, ciclos de vida y flujos)
+> en [diagramas.md](diagramas.md) y en la [galería en vivo](https://rueda-autos.vercel.app/diagramas/index.html).
+> Plan de crecimiento: [escalabilidad.md](escalabilidad.md).
+
 ## Vista general
 
 ```mermaid

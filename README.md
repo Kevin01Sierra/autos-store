@@ -14,6 +14,7 @@ ventas de la propia tienda.
 | Tienda (web) | https://rueda-autos.vercel.app |
 | API REST | https://autos-store-api.vercel.app/api |
 | Documentación Swagger | https://autos-store-api.vercel.app/api/docs |
+| Diagramas interactivos | https://rueda-autos.vercel.app/diagramas/index.html |
 | Estado de la API y la base de datos | https://autos-store-api.vercel.app/api/health |
 
 Desplegado en los planes gratuitos de Vercel (web y API serverless) y Supabase (Postgres y Auth).
@@ -78,7 +79,7 @@ apps/web        React (features: home, catalog, vehicle-detail, discover, compar
                 market, orders, sell, auth, admin)
 packages/contracts   esquemas Zod y tipos compartidos
 supabase        migraciones, RLS y seed
-docs            arquitectura, patrones, ADRs, despliegue y herramientas
+docs            arquitectura, diagramas, escalabilidad, patrones, ADRs, despliegue y herramientas
 ```
 
 ## Modelo de datos
@@ -86,6 +87,18 @@ docs            arquitectura, patrones, ADRs, despliegue y herramientas
 ![Diagrama relacional de la base de datos](docs/diagrams/modelo-relacional.png)
 
 Detalle de relaciones en [docs/architecture.md](docs/architecture.md#modelo-de-datos).
+
+## Diagramas interactivos
+
+18 diagramas generados con [Archify](https://github.com/tt-a1i/archify) a partir del código:
+arquitectura, componentes, clases de cada patrón de diseño, secuencias, ciclos de vida, flujos,
+modelo relacional y la propuesta de escalabilidad.
+
+- Galería en vivo: https://rueda-autos.vercel.app/diagramas/index.html
+- Descripción de cada diagrama: [docs/diagramas.md](docs/diagramas.md)
+- Propuesta de escalabilidad: [docs/escalabilidad.md](docs/escalabilidad.md)
+
+[![Arquitectura del sistema](docs/diagramas/img/arquitectura.png)](https://rueda-autos.vercel.app/diagramas/arquitectura.html)
 
 ## Despliegue
 

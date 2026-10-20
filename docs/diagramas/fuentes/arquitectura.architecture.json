@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Rueda: arquitectura del sistema desplegado",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/arquitectura.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "components": [
+    { "id": "auth", "type": "security", "label": "Supabase Auth", "sublabel": "emite JWT · JWKS", "pos": [260, 40], "size": [160, 64],
+      "sources": [{ "path": "apps/web/src/shared/auth/auth-provider.tsx", "line": 32, "end_line": 39, "label": "signIn / signUp" }] },
+    { "id": "cron", "type": "cloud", "label": "GitHub Actions", "sublabel": "Tareas programadas", "pos": [910, 40], "size": [170, 64], "tag": "lunes 06:00 UTC",
+      "sources": [{ "path": ".github/workflows/scheduled.yml", "line": 1, "end_line": 24 }] },
+    { "id": "user", "type": "external", "label": "Cliente / Admin", "sublabel": "navegador", "icon": "person", "pos": [40, 200], "size": [130, 64] },
+    { "id": "web", "type": "frontend", "label": "Rueda (SPA)", "sublabel": "React 19 + Vite", "pos": [260, 200], "size": [160, 64],
+      "sources": [
+        { "path": "apps/web/src/app/router.tsx", "line": 11, "end_line": 43, "label": "rutas" },
+        { "path": "apps/web/src/shared/api/services.ts", "line": 11, "end_line": 25, "label": "contenedor de servicios" },
+        { "path": "apps/web/vercel.json", "line": 1, "end_line": 12 }
+      ] },
+    { "id": "api", "type": "backend", "label": "API NestJS 12", "sublabel": "Vercel Function /api", "pos": [570, 200], "size": [170, 64], "tag": "hexagonal",
+      "sources": [
+        { "path": "apps/api/api/index.js", "line": 7, "end_line": 14, "label": "handler serverless" },
+        { "path": "apps/api/src/bootstrap.ts", "line": 12, "end_line": 26 },
+        { "path": "apps/api/src/app.module.ts", "line": 18, "end_line": 36, "label": "módulos" }
+      ] },
+    { "id": "runt", "type": "external", "label": "datos.gov.co", "sublabel": "Socrata · parque RUNT", "pos": [910, 200], "size": [170, 64],
+      "sources": [{ "path": "apps/api/src/modules/market-data/infrastructure/socrata-market.source.ts", "line": 20, "end_line": 30, "label": "fetch SoQL" }] },
+    { "id": "db", "type": "database", "label": "Supabase Postgres", "sublabel": "Drizzle · RLS", "pos": [570, 390], "size": [170, 64],
+      "sources": [
+        { "path": "apps/api/src/shared/database/database.module.ts", "line": 12, "end_line": 29, "label": "conexión postgres-js" },
+        { "path": "supabase/migrations/20261020000500_security.sql", "line": 1, "end_line": 20, "label": "políticas RLS" }
+      ] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Vercel (plan gratuito)", "wraps": ["web", "api"] }
+  ],
+  "connections": [
+    { "id": "user-web", "from": "user", "to": "web", "label": "HTTPS", "variant": "emphasis" },
+    { "id": "web-auth", "from": "web", "to": "auth", "label": "login", "variant": "security" },
+    { "id": "web-api", "from": "web", "to": "api", "label": "REST + Bearer JWT", "variant": "emphasis" },
+    { "id": "api-auth", "from": "api", "to": "auth", "label": "verifica JWT (JWKS)", "variant": "security", "fromSide": "top", "toSide": "right" },
+    { "id": "cron-api", "from": "cron", "to": "api", "label": "POST /market/sync", "variant": "dashed", "fromSide": "left", "toSide": "top" },
+    { "id": "api-runt", "from": "api", "to": "runt", "label": "consulta SoQL" },
+    { "id": "api-db", "from": "api", "to": "db", "label": "SQL (transacciones)" },
+    { "id": "web-db", "from": "web", "to": "db", "label": "lee su rol (RLS)", "variant": "security", "fromSide": "bottom", "toSide": "left" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Despliegue", "items": [
+      "Monorepo pnpm + Turborepo con dos proyectos de Vercel: rueda-autos (web) y autos-store-api (API).",
+      "La API corre como una única función serverless que arranca Nest la primera vez y reutiliza la instancia.",
+      "Cada PR genera previews en Vercel y pasa por CI: lint, tipos, pruebas, build y Playwright."
+    ] },
+    { "dot": "rose", "title": "Seguridad", "items": [
+      "La API valida cada JWT contra el JWKS público de Supabase y lee el rol en profiles.",
+      "RLS: catálogo y mercado son de lectura pública; las escrituras solo pasan por la API.",
+      "POST /market/sync exige el encabezado x-cron-secret, comparado en tiempo constante."
+    ] },
+    { "dot": "amber", "title": "Datos de mercado", "items": [
+      "Cada lunes el cron llama a la API, que consulta el parque automotor del RUNT y reemplaza market_stats.",
+      "Otro job hace ping a /api/health cada 3 días para que Supabase no pause el proyecto."
+    ] }
+  ]
+}

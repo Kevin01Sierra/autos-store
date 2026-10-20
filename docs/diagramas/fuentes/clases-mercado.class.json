@@ -1,0 +1,368 @@
+{
+  "schema_version": 1,
+  "diagram_type": "class",
+  "meta": {
+    "title": "Clases: datos de mercado (Adapter y Decorator)",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/clases-mercado.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "layout": {
+    "mode": "grid"
+  },
+  "types": [
+    {
+      "id": "service",
+      "label": "MarketDataService",
+      "kind": "class",
+      "sublabel": "Sincroniza y consulta",
+      "row": 0,
+      "col": 0,
+      "attributes": [
+        {
+          "name": "source",
+          "visibility": "private",
+          "type": "MarketDataSource"
+        },
+        {
+          "name": "stats",
+          "visibility": "private",
+          "type": "MarketStatsRepository"
+        }
+      ],
+      "methods": [
+        {
+          "name": "sync",
+          "visibility": "public",
+          "returns": "{ source, records }"
+        },
+        {
+          "name": "topModels",
+          "visibility": "public",
+          "parameters": "query",
+          "returns": "MarketInsightDto[]"
+        },
+        {
+          "name": "unitsByKey",
+          "visibility": "public",
+          "returns": "Map<string, number>"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/application/market-data.service.ts",
+          "line": 8,
+          "end_line": 32
+        }
+      ]
+    },
+    {
+      "id": "source",
+      "label": "MarketDataSource",
+      "kind": "interface",
+      "sublabel": "Puerto (Target del Adapter)",
+      "row": 0,
+      "col": 1.5,
+      "attributes": [
+        {
+          "name": "name",
+          "visibility": "public",
+          "type": "string"
+        }
+      ],
+      "methods": [
+        {
+          "name": "fetchRecords",
+          "visibility": "public",
+          "returns": "MarketRecord[]",
+          "abstract": true
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/application/market-data.ports.ts",
+          "line": 4,
+          "end_line": 8
+        }
+      ]
+    },
+    {
+      "id": "statsport",
+      "label": "MarketStatsRepository",
+      "kind": "interface",
+      "sublabel": "Puerto de persistencia",
+      "row": 1,
+      "col": 0,
+      "methods": [
+        {
+          "name": "upsertMany",
+          "visibility": "public",
+          "parameters": "records",
+          "returns": "number",
+          "abstract": true
+        },
+        {
+          "name": "topModels",
+          "visibility": "public",
+          "parameters": "query",
+          "returns": "MarketInsightDto[]",
+          "abstract": true
+        },
+        {
+          "name": "unitsByKey",
+          "visibility": "public",
+          "returns": "Map<string, number>",
+          "abstract": true
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/application/market-data.ports.ts",
+          "line": 16,
+          "end_line": 24
+        }
+      ]
+    },
+    {
+      "id": "socrata",
+      "label": "SocrataMarketSource",
+      "kind": "class",
+      "sublabel": "Adapter de datos.gov.co",
+      "row": 1,
+      "col": 1,
+      "attributes": [
+        {
+          "name": "config",
+          "visibility": "private",
+          "type": "ConfigService"
+        }
+      ],
+      "methods": [
+        {
+          "name": "fetchRecords",
+          "visibility": "public",
+          "returns": "MarketRecord[]"
+        },
+        {
+          "name": "toRecord",
+          "visibility": "private",
+          "parameters": "row, fields",
+          "returns": "MarketRecord | null"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/infrastructure/socrata-market.source.ts",
+          "line": 9,
+          "end_line": 51
+        },
+        {
+          "path": "apps/api/src/modules/market-data/infrastructure/socrata-query.ts",
+          "line": 1,
+          "end_line": 33,
+          "label": "consulta SoQL"
+        }
+      ]
+    },
+    {
+      "id": "resilient",
+      "label": "ResilientMarketSource",
+      "kind": "class",
+      "sublabel": "Decorator: reintentos + caché",
+      "row": 1,
+      "col": 2,
+      "attributes": [
+        {
+          "name": "inner",
+          "visibility": "private",
+          "type": "MarketDataSource"
+        },
+        {
+          "name": "cache",
+          "visibility": "private",
+          "type": "records + expiresAt"
+        },
+        {
+          "name": "retries",
+          "visibility": "private",
+          "type": "3"
+        }
+      ],
+      "methods": [
+        {
+          "name": "fetchRecords",
+          "visibility": "public",
+          "returns": "MarketRecord[]"
+        },
+        {
+          "name": "withRetry",
+          "visibility": "private",
+          "parameters": "attempt",
+          "returns": "MarketRecord[]"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/infrastructure/resilient-market.source.ts",
+          "line": 4,
+          "end_line": 37
+        }
+      ]
+    },
+    {
+      "id": "drizzle",
+      "label": "DrizzleMarketStatsRepository",
+      "kind": "class",
+      "sublabel": "upsert en market_stats",
+      "row": 2,
+      "col": 0,
+      "methods": [
+        {
+          "name": "upsertMany",
+          "visibility": "public",
+          "parameters": "records",
+          "returns": "number"
+        },
+        {
+          "name": "unitsByKey",
+          "visibility": "public",
+          "returns": "Map<string, number>"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/infrastructure/drizzle-market-stats.repository.ts",
+          "line": 11,
+          "end_line": 59
+        }
+      ]
+    },
+    {
+      "id": "record",
+      "label": "MarketRecord",
+      "kind": "record",
+      "sublabel": "Formato propio, sin importar la fuente",
+      "row": 2,
+      "col": 1.5,
+      "attributes": [
+        {
+          "name": "brand",
+          "visibility": "public",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "visibility": "public",
+          "type": "string"
+        },
+        {
+          "name": "color",
+          "visibility": "public",
+          "type": "string | null"
+        },
+        {
+          "name": "period",
+          "visibility": "public",
+          "type": "YYYY-MM-01"
+        },
+        {
+          "name": "units",
+          "visibility": "public",
+          "type": "number"
+        },
+        {
+          "name": "source",
+          "visibility": "public",
+          "type": "string"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/domain/market-record.ts",
+          "line": 1,
+          "end_line": 10
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "service-source",
+      "from": "service",
+      "to": "source",
+      "kind": "association",
+      "label": "source"
+    },
+    {
+      "id": "service-stats",
+      "from": "service",
+      "to": "statsport",
+      "kind": "association",
+      "label": "stats"
+    },
+    {
+      "id": "socrata-source",
+      "from": "socrata",
+      "to": "source",
+      "kind": "realization"
+    },
+    {
+      "id": "resilient-source",
+      "from": "resilient",
+      "to": "source",
+      "kind": "realization"
+    },
+    {
+      "id": "resilient-socrata",
+      "from": "resilient",
+      "to": "socrata",
+      "kind": "aggregation",
+      "label": "envuelve"
+    },
+    {
+      "id": "drizzle-stats",
+      "from": "drizzle",
+      "to": "statsport",
+      "kind": "realization"
+    },
+    {
+      "id": "socrata-record",
+      "from": "socrata",
+      "to": "record",
+      "kind": "dependency",
+      "label": "crea"
+    },
+    {
+      "id": "drizzle-record",
+      "from": "drizzle",
+      "to": "record",
+      "kind": "dependency",
+      "label": "guarda"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Patrones",
+      "items": [
+        "Adapter: SocrataMarketSource traduce las filas de Socrata (marca, linea, modelo) a MarketRecord.",
+        "Decorator: ResilientMarketSource implementa el mismo puerto, agrega 3 reintentos con espera exponencial y una caché de 1 hora, y delega en la fuente real.",
+        "MarketDataModule los compone con useFactory: new ResilientMarketSource(new SocrataMarketSource(config))."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Beneficio",
+      "items": [
+        "Cambiar de conjunto de datos o de proveedor es escribir otro adaptador; el servicio y las recomendaciones no cambian.",
+        "Las columnas del conjunto de datos se configuran con variables de entorno MARKET_* (ver ADR 0004)."
+      ]
+    }
+  ]
+}
