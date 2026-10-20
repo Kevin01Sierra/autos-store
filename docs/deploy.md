@@ -11,7 +11,8 @@
 ## 2. Vercel: API
 - New Project → importa el repo → Root Directory `apps/api`.
 - Variables: `DATABASE_URL`, `SUPABASE_URL`, `CORS_ORIGINS` (URL de la web), `CRON_SECRET`,
-  y opcionalmente `MARKET_DATASET_URL` + `MARKET_FIELD_*`.
+  y para datos reales de mercado `MARKET_DATASET_URL` y `MARKET_WHERE` (valores en
+  `apps/api/.env.example` y [ADR 0004](adr/0004-datos-de-mercado.md)).
 - Swagger queda en `https://<api>/api/docs`.
 
 ## 3. Vercel: web

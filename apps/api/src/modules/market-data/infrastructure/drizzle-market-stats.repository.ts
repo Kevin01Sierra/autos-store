@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { MarketInsightDto } from '@autos/contracts';
-import { and, desc, ilike, sql, sum } from 'drizzle-orm';
+import { and, desc, eq, ilike, sql, sum } from 'drizzle-orm';
 import { DATABASE, type Database } from '../../../shared/database/database.tokens.js';
 import { marketStats } from '../../../shared/database/schema/index.js';
 import type { MarketStatsRepository, TopModelsQuery } from '../application/market-data.ports.js';
@@ -14,6 +14,8 @@ export class DrizzleMarketStatsRepository implements MarketStatsRepository {
 
   async upsertMany(records: MarketRecord[]): Promise<number> {
     if (records.length === 0) return 0;
+    // Con datos reales, los de demostración del seed dejan de tener sentido.
+    await this.db.delete(marketStats).where(eq(marketStats.source, 'demo'));
     await this.db
       .insert(marketStats)
       .values(records)
@@ -49,7 +51,7 @@ export class DrizzleMarketStatsRepository implements MarketStatsRepository {
     const map = new Map<string, number>();
     for (const row of rows) {
       const modelKey = popularityKey(row.brand, row.model);
-      map.set(popularityKey(row.brand, row.model, row.color), row.units);
+      if (row.color) map.set(popularityKey(row.brand, row.model, row.color), row.units);
       map.set(modelKey, (map.get(modelKey) ?? 0) + row.units);
     }
     return map;
