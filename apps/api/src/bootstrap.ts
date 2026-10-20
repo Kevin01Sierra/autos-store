@@ -1,4 +1,6 @@
 import 'reflect-metadata';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import type { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -19,6 +21,12 @@ export async function createApp(): Promise<INestApplication> {
     .setVersion('1.0')
     .addBearerAuth()
     .build();
-  SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, docs));
+  SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, docs), swaggerUiOptions());
   return app;
+}
+
+/** En Vercel los archivos de Swagger UI viajan dentro de dist/ (los copia el build). */
+function swaggerUiOptions() {
+  const bundled = resolve(import.meta.dirname, 'swagger-ui');
+  return existsSync(bundled) ? { customSwaggerUiPath: bundled } : {};
 }
