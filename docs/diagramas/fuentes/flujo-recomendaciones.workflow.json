@@ -1,0 +1,312 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Flujo: recomendaciones de Descubre tu auto",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/flujo-recomendaciones.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    },
+    "legend": {
+      "entries": {
+        "frontend": {
+          "label": "Web"
+        },
+        "backend": {
+          "label": "API / dominio"
+        },
+        "database": {
+          "label": "Base de datos"
+        },
+        "security": {
+          "label": "Seguridad / error"
+        },
+        "messagebus": {
+          "label": "Evento asíncrono"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "web",
+      "label": "Web"
+    },
+    {
+      "id": "api",
+      "label": "API NestJS"
+    },
+    {
+      "id": "data",
+      "label": "Datos"
+    },
+    {
+      "id": "domain",
+      "label": "Dominio (estrategias)"
+    }
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "label": "Preferencias",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "p2",
+      "label": "Recolectar",
+      "fromCol": 2,
+      "toCol": 3
+    },
+    {
+      "id": "p3",
+      "label": "Puntuar y mostrar",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "wizard",
+    "local",
+    "endpoint",
+    "service",
+    "read",
+    "factory",
+    "composite",
+    "sort",
+    "cards"
+  ],
+  "nodes": [
+    {
+      "id": "wizard",
+      "lane": "web",
+      "col": 0,
+      "type": "frontend",
+      "label": "Asistente",
+      "sublabel": "marca, color, presupuesto",
+      "sources": [
+        {
+          "path": "apps/web/src/features/discover/discover-page.tsx",
+          "line": 12,
+          "end_line": 30
+        }
+      ]
+    },
+    {
+      "id": "local",
+      "lane": "web",
+      "col": 1,
+      "type": "frontend",
+      "label": "localStorage",
+      "sublabel": "rueda-preferences",
+      "sources": [
+        {
+          "path": "apps/web/src/features/discover/preferences-store.ts",
+          "line": 1,
+          "end_line": 13
+        }
+      ]
+    },
+    {
+      "id": "saved",
+      "lane": "data",
+      "col": 1,
+      "type": "database",
+      "label": "user_preferences",
+      "sublabel": "si hay sesión",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/infrastructure/drizzle-preferences.repository.ts",
+          "line": 18,
+          "end_line": 41
+        }
+      ]
+    },
+    {
+      "id": "endpoint",
+      "lane": "api",
+      "col": 2,
+      "type": "backend",
+      "label": "POST /recommendations",
+      "sublabel": "público · Zod",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/presentation/recommendations.controller.ts",
+          "line": 20,
+          "end_line": 27
+        }
+      ]
+    },
+    {
+      "id": "service",
+      "lane": "api",
+      "col": 3,
+      "type": "backend",
+      "label": "RecommendationsService",
+      "sublabel": "recommend()",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/application/recommendations.service.ts",
+          "line": 33,
+          "end_line": 43
+        }
+      ]
+    },
+    {
+      "id": "read",
+      "lane": "data",
+      "col": 3,
+      "type": "database",
+      "label": "Lectura en paralelo",
+      "sublabel": "vehículos, mercado, ventas",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/application/recommendations.service.ts",
+          "line": 34,
+          "end_line": 38
+        }
+      ]
+    },
+    {
+      "id": "factory",
+      "lane": "domain",
+      "col": 4,
+      "type": "backend",
+      "label": "Factory Method",
+      "sublabel": "¿tiene preferencias?",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/application/recommendation-strategy.factory.ts",
+          "line": 10,
+          "end_line": 28
+        }
+      ]
+    },
+    {
+      "id": "composite",
+      "lane": "domain",
+      "col": 5,
+      "type": "backend",
+      "label": "Composite ponderado",
+      "sublabel": "3 estrategias",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/domain/strategies/weighted-composite.strategy.ts",
+          "line": 11,
+          "end_line": 27
+        }
+      ]
+    },
+    {
+      "id": "sort",
+      "lane": "api",
+      "col": 5,
+      "type": "backend",
+      "label": "Ordenar y cortar",
+      "sublabel": "top N (máx. 24)"
+    },
+    {
+      "id": "cards",
+      "lane": "web",
+      "col": 5,
+      "type": "frontend",
+      "label": "Tarjetas",
+      "sublabel": "puntaje + motivos",
+      "sources": [
+        {
+          "path": "apps/web/src/features/discover/recommendation-card.tsx"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "wizard-local",
+      "from": "wizard",
+      "to": "local",
+      "label": "guarda"
+    },
+    {
+      "id": "local-saved",
+      "from": "local",
+      "to": "saved",
+      "label": "PUT /preferences/me",
+      "role": "branch",
+      "variant": "dashed"
+    },
+    {
+      "id": "local-endpoint",
+      "from": "local",
+      "to": "endpoint",
+      "label": "preferencias",
+      "variant": "emphasis"
+    },
+    {
+      "id": "endpoint-service",
+      "from": "endpoint",
+      "to": "service"
+    },
+    {
+      "id": "service-read",
+      "from": "service",
+      "to": "read",
+      "label": "Promise.all"
+    },
+    {
+      "id": "read-factory",
+      "from": "read",
+      "to": "factory",
+      "label": "contexto"
+    },
+    {
+      "id": "factory-composite",
+      "from": "factory",
+      "to": "composite",
+      "label": "pesos"
+    },
+    {
+      "id": "composite-sort",
+      "from": "composite",
+      "to": "sort",
+      "label": "puntaje 0..1"
+    },
+    {
+      "id": "sort-cards",
+      "from": "sort",
+      "to": "cards",
+      "label": "200 JSON",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Pesos",
+      "items": [
+        "Sin preferencias: 70 % popularidad en el mercado colombiano + 30 % ventas de la tienda.",
+        "Con preferencias: 60 % coincidencia + 30 % mercado + 10 % ventas."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Datos de entrada",
+      "items": [
+        "Hasta 100 vehículos publicados con stock, las unidades del RUNT por marca y modelo, y las ventas internas por modelo y color.",
+        "Cada estrategia devuelve un motivo legible, por ejemplo \"Spark: 12.345 unidades registradas en el mercado\"."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Sin cuenta",
+      "items": [
+        "El endpoint es público: las preferencias viajan en el cuerpo y también funcionan sin iniciar sesión."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,421 @@
+{
+  "schema_version": 1,
+  "diagram_type": "class",
+  "meta": {
+    "title": "Clases: compra (Facade, Chain of Responsibility, Unit of Work, Observer)",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/clases-compra.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "layout": {
+    "mode": "grid"
+  },
+  "types": [
+    {
+      "id": "facade",
+      "label": "PurchaseFacade",
+      "kind": "class",
+      "sublabel": "Facade: único punto para comprar",
+      "row": 0,
+      "col": 0,
+      "attributes": [
+        {
+          "name": "validator",
+          "visibility": "private",
+          "type": "PurchaseValidator"
+        },
+        {
+          "name": "vehicles",
+          "visibility": "private",
+          "type": "VehiclesService"
+        },
+        {
+          "name": "orders",
+          "visibility": "private",
+          "type": "OrderRepository"
+        },
+        {
+          "name": "events",
+          "visibility": "private",
+          "type": "EventEmitter2"
+        }
+      ],
+      "methods": [
+        {
+          "name": "purchase",
+          "visibility": "public",
+          "parameters": "input, customer",
+          "returns": "OrderDto"
+        },
+        {
+          "name": "buildContext",
+          "visibility": "private",
+          "parameters": "input, customer",
+          "returns": "PurchaseContext"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/application/purchase.facade.ts",
+          "line": 11,
+          "end_line": 50
+        }
+      ]
+    },
+    {
+      "id": "chain",
+      "label": "createPurchaseChain",
+      "kind": "class",
+      "sublabel": "arma la cadena (función)",
+      "row": 0,
+      "col": 1,
+      "attributes": [
+        {
+          "name": "MAX_UNITS_PER_PURCHASE",
+          "visibility": "public",
+          "type": "5",
+          "static": true
+        }
+      ],
+      "methods": [
+        {
+          "name": "create",
+          "visibility": "public",
+          "returns": "PurchaseValidator"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/application/purchase-chain.factory.ts",
+          "line": 7,
+          "end_line": 18
+        }
+      ]
+    },
+    {
+      "id": "validator",
+      "label": "PurchaseValidator",
+      "kind": "abstract",
+      "sublabel": "Chain of Responsibility",
+      "row": 0,
+      "col": 2,
+      "attributes": [
+        {
+          "name": "nextValidator",
+          "visibility": "private",
+          "type": "PurchaseValidator?"
+        }
+      ],
+      "methods": [
+        {
+          "name": "setNext",
+          "visibility": "public",
+          "parameters": "validator",
+          "returns": "PurchaseValidator"
+        },
+        {
+          "name": "validate",
+          "visibility": "public",
+          "parameters": "context",
+          "returns": "void"
+        },
+        {
+          "name": "check",
+          "visibility": "protected",
+          "parameters": "context",
+          "returns": "void",
+          "abstract": true
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/validation/purchase-validator.ts",
+          "line": 3,
+          "end_line": 21
+        }
+      ]
+    },
+    {
+      "id": "repo",
+      "label": "OrderRepository",
+      "kind": "interface",
+      "sublabel": "Puerto · token ORDER_REPOSITORY",
+      "row": 1,
+      "col": 0,
+      "methods": [
+        {
+          "name": "place",
+          "visibility": "public",
+          "parameters": "customerId, lines",
+          "returns": "OrderDto",
+          "abstract": true
+        },
+        {
+          "name": "changeStatus",
+          "visibility": "public",
+          "parameters": "id, status, releaseStock",
+          "returns": "OrderDto",
+          "abstract": true
+        },
+        {
+          "name": "findByCustomer",
+          "visibility": "public",
+          "parameters": "customerId",
+          "returns": "OrderDto[]",
+          "abstract": true
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/application/order.repository.ts",
+          "line": 9,
+          "end_line": 21
+        }
+      ]
+    },
+    {
+      "id": "context",
+      "label": "PurchaseContext",
+      "kind": "record",
+      "sublabel": "Cliente + líneas a comprar",
+      "row": 1,
+      "col": 1,
+      "attributes": [
+        {
+          "name": "customer",
+          "visibility": "public",
+          "type": "AuthUser"
+        },
+        {
+          "name": "lines",
+          "visibility": "public",
+          "type": "PurchaseLine[]"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/validation/purchase-context.ts",
+          "line": 1,
+          "end_line": 12
+        }
+      ]
+    },
+    {
+      "id": "reader",
+      "label": "SalesStatsReader",
+      "kind": "interface",
+      "sublabel": "Puerto de ventas internas",
+      "row": 1,
+      "col": 2,
+      "methods": [
+        {
+          "name": "unitsByModelColor",
+          "visibility": "public",
+          "returns": "Map<string, number>",
+          "abstract": true
+        },
+        {
+          "name": "refresh",
+          "visibility": "public",
+          "returns": "void",
+          "abstract": true
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/application/recommendation.ports.ts",
+          "line": 1,
+          "end_line": 8
+        }
+      ]
+    },
+    {
+      "id": "drizzle",
+      "label": "DrizzleOrderRepository",
+      "kind": "class",
+      "sublabel": "Unit of Work en una transacción",
+      "row": 2,
+      "col": 0,
+      "methods": [
+        {
+          "name": "place",
+          "visibility": "public",
+          "parameters": "customerId, lines",
+          "returns": "OrderDto"
+        },
+        {
+          "name": "changeStatus",
+          "visibility": "public",
+          "parameters": "id, status, releaseStock",
+          "returns": "OrderDto"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/infrastructure/drizzle-order.repository.ts",
+          "line": 10,
+          "end_line": 48
+        },
+        {
+          "path": "apps/api/src/modules/orders/infrastructure/stock-movement.ts",
+          "line": 7,
+          "end_line": 20,
+          "label": "UPDATE condicional"
+        }
+      ]
+    },
+    {
+      "id": "event",
+      "label": "OrderPlacedEvent",
+      "kind": "class",
+      "sublabel": "Evento de dominio order.placed",
+      "row": 2,
+      "col": 1,
+      "attributes": [
+        {
+          "name": "NAME",
+          "visibility": "public",
+          "type": "'order.placed'",
+          "static": true
+        },
+        {
+          "name": "orderId",
+          "visibility": "public",
+          "type": "string"
+        },
+        {
+          "name": "vehicleIds",
+          "visibility": "public",
+          "type": "string[]"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/order.events.ts",
+          "line": 1,
+          "end_line": 11
+        }
+      ]
+    },
+    {
+      "id": "listener",
+      "label": "SalesStatsListener",
+      "kind": "class",
+      "sublabel": "Observer: @OnEvent asíncrono",
+      "row": 2,
+      "col": 2,
+      "attributes": [
+        {
+          "name": "sales",
+          "visibility": "private",
+          "type": "SalesStatsReader"
+        }
+      ],
+      "methods": [
+        {
+          "name": "onOrderChanged",
+          "visibility": "public",
+          "parameters": "event",
+          "returns": "void"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/application/sales-stats.listener.ts",
+          "line": 8,
+          "end_line": 26
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "facade-chain",
+      "from": "facade",
+      "to": "chain",
+      "kind": "dependency",
+      "label": "obtiene"
+    },
+    {
+      "id": "chain-validator",
+      "from": "chain",
+      "to": "validator",
+      "kind": "dependency",
+      "label": "encadena"
+    },
+    {
+      "id": "facade-repo",
+      "from": "facade",
+      "to": "repo",
+      "kind": "association",
+      "label": "orders"
+    },
+    {
+      "id": "facade-context",
+      "from": "facade",
+      "to": "context",
+      "kind": "dependency",
+      "label": "construye"
+    },
+    {
+      "id": "validator-context",
+      "from": "validator",
+      "to": "context",
+      "kind": "dependency",
+      "label": "revisa"
+    },
+    {
+      "id": "drizzle-repo",
+      "from": "drizzle",
+      "to": "repo",
+      "kind": "realization"
+    },
+    {
+      "id": "facade-event",
+      "from": "facade",
+      "to": "event",
+      "kind": "dependency",
+      "label": "publica"
+    },
+    {
+      "id": "listener-event",
+      "from": "listener",
+      "to": "event",
+      "kind": "dependency",
+      "label": "escucha"
+    },
+    {
+      "id": "listener-reader",
+      "from": "listener",
+      "to": "reader",
+      "kind": "association",
+      "label": "refresh()"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Patrones",
+      "items": [
+        "Facade: PurchaseFacade oculta la carga de vehículos, la validación, la transacción y el evento detrás de purchase().",
+        "Chain of Responsibility: cada PurchaseValidator revisa una regla y delega en el siguiente.",
+        "Unit of Work: DrizzleOrderRepository.place descuenta stock y crea el pedido en una sola transacción.",
+        "Observer: SalesStatsListener refresca la vista materializada sales_stats al recibir order.placed u order.status-changed."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Garantías",
+      "items": [
+        "El UPDATE de stock solo aplica si stock >= cantidad; si otro cliente compró antes, se revierte todo (sin sobreventa).",
+        "Pedidos no importa nada de Recomendaciones: solo emite eventos."
+      ]
+    }
+  ]
+}

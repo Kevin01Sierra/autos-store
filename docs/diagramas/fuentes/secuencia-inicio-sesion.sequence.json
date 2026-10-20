@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Secuencia: inicio de sesión y autorización por rol",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/secuencia-inicio-sesion.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "participants": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "Usuario",
+      "sublabel": "formulario",
+      "icon": "person"
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "AuthProvider",
+      "sublabel": "React Context",
+      "sources": [
+        {
+          "path": "apps/web/src/shared/auth/auth-provider.tsx",
+          "line": 16,
+          "end_line": 42
+        }
+      ]
+    },
+    {
+      "id": "auth",
+      "type": "security",
+      "label": "Supabase Auth",
+      "sublabel": "GoTrue"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "profiles + RLS",
+      "sources": [
+        {
+          "path": "supabase/migrations/20261020000500_security.sql",
+          "line": 19,
+          "end_line": 19,
+          "label": "perfil propio"
+        },
+        {
+          "path": "supabase/migrations/20261020000500_security.sql",
+          "line": 24,
+          "end_line": 36,
+          "label": "trigger handle_new_user"
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API NestJS",
+      "sublabel": "AuthGuard",
+      "sources": [
+        {
+          "path": "apps/api/src/shared/auth/supabase-token.verifier.ts",
+          "line": 12,
+          "end_line": 25
+        }
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "from": 160,
+      "to": 472,
+      "label": "En el navegador"
+    },
+    {
+      "from": 502,
+      "to": 637,
+      "label": "En la API"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "user",
+      "to": "web",
+      "y": 170,
+      "label": "correo + contraseña",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m2",
+      "from": "web",
+      "to": "auth",
+      "y": 200,
+      "label": "signInWithPassword()",
+      "variant": "security",
+      "note": "En el registro: signUp con full_name; un trigger crea su fila en profiles"
+    },
+    {
+      "id": "m3",
+      "from": "auth",
+      "to": "web",
+      "y": 292,
+      "label": "sesión (JWT de acceso)",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "web",
+      "to": "db",
+      "y": 322,
+      "label": "select role from profiles",
+      "variant": "security",
+      "note": "RLS: cada usuario solo puede leer su propio perfil"
+    },
+    {
+      "id": "m5",
+      "from": "db",
+      "to": "web",
+      "y": 402,
+      "label": "admin | customer",
+      "variant": "return"
+    },
+    {
+      "id": "m6",
+      "from": "web",
+      "to": "user",
+      "y": 432,
+      "label": "muestra menú según rol",
+      "variant": "return",
+      "note": "RequireAuth role=\"admin\" protege las rutas /admin"
+    },
+    {
+      "id": "m7",
+      "from": "web",
+      "to": "api",
+      "y": 512,
+      "label": "petición con Bearer JWT",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m8",
+      "from": "api",
+      "to": "auth",
+      "y": 542,
+      "label": "JWKS (/.well-known/jwks.json)",
+      "variant": "security",
+      "note": "jose descarga y cachea las llaves públicas"
+    },
+    {
+      "id": "m9",
+      "from": "api",
+      "to": "web",
+      "y": 622,
+      "label": "respuesta o 401 / 403",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "web",
+      "from": 165,
+      "to": 518,
+      "type": "frontend"
+    },
+    {
+      "participant": "api",
+      "from": 507,
+      "to": 628,
+      "type": "backend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Doble control",
+      "items": [
+        "La web oculta pantallas según el rol, pero la decisión real la toma la API en cada petición.",
+        "La API nunca confía en el rol que envía el navegador: lo lee de profiles con su propia conexión."
+      ]
+    }
+  ]
+}

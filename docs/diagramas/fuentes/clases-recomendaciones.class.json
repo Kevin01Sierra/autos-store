@@ -1,0 +1,339 @@
+{
+  "schema_version": 1,
+  "diagram_type": "class",
+  "meta": {
+    "title": "Clases: recomendaciones (Strategy, Composite, Factory Method)",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/clases-recomendaciones.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "layout": {
+    "mode": "grid"
+  },
+  "types": [
+    {
+      "id": "service",
+      "label": "RecommendationsService",
+      "kind": "class",
+      "sublabel": "Puntúa y ordena candidatos",
+      "row": 0,
+      "col": 0,
+      "attributes": [
+        {
+          "name": "vehicles",
+          "visibility": "private",
+          "type": "VehicleRepository"
+        },
+        {
+          "name": "sales",
+          "visibility": "private",
+          "type": "SalesStatsReader"
+        },
+        {
+          "name": "preferences",
+          "visibility": "private",
+          "type": "PreferencesRepository"
+        },
+        {
+          "name": "market",
+          "visibility": "private",
+          "type": "MarketDataService"
+        }
+      ],
+      "methods": [
+        {
+          "name": "forUser",
+          "visibility": "public",
+          "parameters": "userId, limit",
+          "returns": "RecommendationDto[]"
+        },
+        {
+          "name": "recommend",
+          "visibility": "public",
+          "parameters": "preferences, limit",
+          "returns": "RecommendationDto[]"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/application/recommendations.service.ts",
+          "line": 16,
+          "end_line": 43
+        }
+      ]
+    },
+    {
+      "id": "factory",
+      "label": "createRecommendationStrategy",
+      "kind": "class",
+      "sublabel": "Factory Method (función)",
+      "row": 0,
+      "col": 1,
+      "methods": [
+        {
+          "name": "create",
+          "visibility": "public",
+          "parameters": "preferences: PreferencesDto",
+          "returns": "WeightedCompositeStrategy"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/application/recommendation-strategy.factory.ts",
+          "line": 10,
+          "end_line": 28
+        }
+      ]
+    },
+    {
+      "id": "composite",
+      "label": "WeightedCompositeStrategy",
+      "kind": "class",
+      "sublabel": "Composite: suma ponderada",
+      "row": 0,
+      "col": 2,
+      "attributes": [
+        {
+          "name": "parts",
+          "visibility": "private",
+          "type": "WeightedStrategy[]"
+        }
+      ],
+      "methods": [
+        {
+          "name": "score",
+          "visibility": "public",
+          "parameters": "vehicle, context",
+          "returns": "StrategyScore + reasons"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/domain/strategies/weighted-composite.strategy.ts",
+          "line": 6,
+          "end_line": 27
+        }
+      ]
+    },
+    {
+      "id": "context",
+      "label": "RecommendationContext",
+      "kind": "record",
+      "sublabel": "Datos compartidos",
+      "row": 1,
+      "col": 0,
+      "attributes": [
+        {
+          "name": "preferences",
+          "visibility": "public",
+          "type": "PreferencesDto"
+        },
+        {
+          "name": "marketUnits",
+          "visibility": "public",
+          "type": "Map<string, number>"
+        },
+        {
+          "name": "salesUnits",
+          "visibility": "public",
+          "type": "Map<string, number>"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/domain/recommendation-strategy.ts",
+          "line": 3,
+          "end_line": 8
+        }
+      ]
+    },
+    {
+      "id": "strategy",
+      "label": "RecommendationStrategy",
+      "kind": "interface",
+      "sublabel": "Strategy: algoritmo intercambiable",
+      "row": 1,
+      "col": 1,
+      "attributes": [
+        {
+          "name": "name",
+          "visibility": "public",
+          "type": "string"
+        }
+      ],
+      "methods": [
+        {
+          "name": "score",
+          "visibility": "public",
+          "parameters": "vehicle, context",
+          "returns": "StrategyScore",
+          "abstract": true
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/domain/recommendation-strategy.ts",
+          "line": 10,
+          "end_line": 20
+        }
+      ]
+    },
+    {
+      "id": "market",
+      "label": "MarketPopularityStrategy",
+      "kind": "class",
+      "sublabel": "Parque automotor real (RUNT)",
+      "row": 2,
+      "col": 0,
+      "methods": [
+        {
+          "name": "score",
+          "visibility": "public",
+          "parameters": "vehicle, context",
+          "returns": "StrategyScore"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/domain/strategies/market-popularity.strategy.ts",
+          "line": 7,
+          "end_line": 26
+        }
+      ]
+    },
+    {
+      "id": "preference",
+      "label": "PreferenceMatchStrategy",
+      "kind": "class",
+      "sublabel": "Marca, modelo, color, presupuesto",
+      "row": 2,
+      "col": 1,
+      "methods": [
+        {
+          "name": "score",
+          "visibility": "public",
+          "parameters": "vehicle, context",
+          "returns": "StrategyScore"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/domain/strategies/preference-match.strategy.ts",
+          "line": 6,
+          "end_line": 25
+        }
+      ]
+    },
+    {
+      "id": "sales",
+      "label": "StoreSalesStrategy",
+      "kind": "class",
+      "sublabel": "Ventas de la tienda",
+      "row": 2,
+      "col": 2,
+      "methods": [
+        {
+          "name": "score",
+          "visibility": "public",
+          "parameters": "vehicle, context",
+          "returns": "StrategyScore"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/domain/strategies/store-sales.strategy.ts",
+          "line": 8,
+          "end_line": 20
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "service-factory",
+      "from": "service",
+      "to": "factory",
+      "kind": "dependency",
+      "label": "pide estrategia"
+    },
+    {
+      "id": "factory-composite",
+      "from": "factory",
+      "to": "composite",
+      "kind": "dependency",
+      "label": "crea"
+    },
+    {
+      "id": "service-context",
+      "from": "service",
+      "to": "context",
+      "kind": "dependency",
+      "label": "arma"
+    },
+    {
+      "id": "composite-strategy",
+      "from": "composite",
+      "to": "strategy",
+      "kind": "aggregation",
+      "label": "combina 1..n"
+    },
+    {
+      "id": "strategy-context",
+      "from": "strategy",
+      "to": "context",
+      "kind": "dependency",
+      "label": "lee"
+    },
+    {
+      "id": "market-strategy",
+      "from": "market",
+      "to": "strategy",
+      "kind": "realization"
+    },
+    {
+      "id": "preference-strategy",
+      "from": "preference",
+      "to": "strategy",
+      "kind": "realization"
+    },
+    {
+      "id": "sales-strategy",
+      "from": "sales",
+      "to": "strategy",
+      "kind": "realization"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Patrones",
+      "items": [
+        "Strategy: cada algoritmo implementa RecommendationStrategy y devuelve un puntaje de 0 a 1 con un motivo legible.",
+        "Composite: WeightedCompositeStrategy también es una estrategia; combina las demás con pesos y junta sus motivos.",
+        "Factory Method: createRecommendationStrategy elige la combinación según si el usuario tiene preferencias."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Pesos que elige la fábrica",
+      "items": [
+        "Sin preferencias: 70 % popularidad en el mercado + 30 % ventas de la tienda.",
+        "Con preferencias: 60 % coincidencia + 30 % mercado + 10 % ventas."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Por qué así",
+      "items": [
+        "Agregar un algoritmo nuevo es crear una clase y sumarla en la fábrica; el servicio no cambia.",
+        "WeightedCompositeStrategy también implementa RecommendationStrategy (realización), aunque aquí solo se dibuja la agregación."
+      ]
+    }
+  ]
+}

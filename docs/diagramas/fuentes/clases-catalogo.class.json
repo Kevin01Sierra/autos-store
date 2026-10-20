@@ -1,0 +1,407 @@
+{
+  "schema_version": 1,
+  "diagram_type": "class",
+  "meta": {
+    "title": "Clases: catálogo (Template Method, Repository genérico, Builder)",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/clases-catalogo.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "layout": {
+    "mode": "grid"
+  },
+  "types": [
+    {
+      "id": "crudservice",
+      "label": "CrudService<T>",
+      "kind": "abstract",
+      "sublabel": "Template Method",
+      "row": 0,
+      "col": 0,
+      "attributes": [
+        {
+          "name": "entityName",
+          "visibility": "protected",
+          "type": "string"
+        },
+        {
+          "name": "repository",
+          "visibility": "protected",
+          "type": "CrudRepository"
+        }
+      ],
+      "methods": [
+        {
+          "name": "list",
+          "visibility": "public",
+          "returns": "T[]"
+        },
+        {
+          "name": "get",
+          "visibility": "public",
+          "parameters": "id",
+          "returns": "T"
+        },
+        {
+          "name": "create",
+          "visibility": "public",
+          "parameters": "input",
+          "returns": "T"
+        },
+        {
+          "name": "update",
+          "visibility": "public",
+          "parameters": "id, input",
+          "returns": "T"
+        },
+        {
+          "name": "prepareCreate",
+          "visibility": "protected",
+          "parameters": "input",
+          "returns": "TCreate",
+          "abstract": true
+        },
+        {
+          "name": "prepareUpdate",
+          "visibility": "protected",
+          "parameters": "input",
+          "returns": "TUpdate"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/shared/application/crud.service.ts",
+          "line": 4,
+          "end_line": 45
+        }
+      ]
+    },
+    {
+      "id": "crudrepo",
+      "label": "CrudRepository<T>",
+      "kind": "interface",
+      "sublabel": "Puerto genérico (Repository)",
+      "row": 0,
+      "col": 1,
+      "methods": [
+        {
+          "name": "findAll",
+          "visibility": "public",
+          "returns": "T[]",
+          "abstract": true
+        },
+        {
+          "name": "findById",
+          "visibility": "public",
+          "parameters": "id",
+          "returns": "T | null",
+          "abstract": true
+        },
+        {
+          "name": "create",
+          "visibility": "public",
+          "parameters": "data",
+          "returns": "T",
+          "abstract": true
+        },
+        {
+          "name": "update",
+          "visibility": "public",
+          "parameters": "id, data",
+          "returns": "T | null",
+          "abstract": true
+        },
+        {
+          "name": "remove",
+          "visibility": "public",
+          "parameters": "id",
+          "returns": "boolean",
+          "abstract": true
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/shared/application/crud.repository.ts",
+          "line": 1,
+          "end_line": 8
+        }
+      ]
+    },
+    {
+      "id": "drizzlecrud",
+      "label": "DrizzleCrudRepository<T>",
+      "kind": "abstract",
+      "sublabel": "Repositorio genérico sobre Drizzle",
+      "row": 0,
+      "col": 2,
+      "attributes": [
+        {
+          "name": "db",
+          "visibility": "protected",
+          "type": "Database"
+        },
+        {
+          "name": "table",
+          "visibility": "protected",
+          "type": "PgTable"
+        }
+      ],
+      "methods": [
+        {
+          "name": "toEntity",
+          "visibility": "protected",
+          "parameters": "row",
+          "returns": "T",
+          "abstract": true
+        },
+        {
+          "name": "findAll",
+          "visibility": "public",
+          "returns": "T[]"
+        },
+        {
+          "name": "create",
+          "visibility": "public",
+          "parameters": "data",
+          "returns": "T"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/shared/database/drizzle-crud.repository.ts",
+          "line": 7,
+          "end_line": 56
+        }
+      ]
+    },
+    {
+      "id": "brands",
+      "label": "BrandsService",
+      "kind": "class",
+      "sublabel": "slug a partir del nombre",
+      "row": 1,
+      "col": 0,
+      "methods": [
+        {
+          "name": "prepareCreate",
+          "visibility": "protected",
+          "parameters": "input",
+          "returns": "NewBrand"
+        },
+        {
+          "name": "prepareUpdate",
+          "visibility": "protected",
+          "parameters": "input",
+          "returns": "BrandChanges"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/brands/application/brands.service.ts",
+          "line": 9,
+          "end_line": 24
+        }
+      ]
+    },
+    {
+      "id": "drizzlebrand",
+      "label": "DrizzleBrandRepository",
+      "kind": "class",
+      "sublabel": "tabla brands",
+      "row": 1,
+      "col": 2,
+      "methods": [
+        {
+          "name": "toEntity",
+          "visibility": "protected",
+          "parameters": "row",
+          "returns": "BrandDto"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/brands/infrastructure/drizzle-brand.repository.ts",
+          "line": 8,
+          "end_line": 21
+        }
+      ]
+    },
+    {
+      "id": "models",
+      "label": "ModelsService",
+      "kind": "class",
+      "sublabel": "valida la marca",
+      "row": 2,
+      "col": 0,
+      "attributes": [
+        {
+          "name": "brands",
+          "visibility": "private",
+          "type": "BrandsService"
+        }
+      ],
+      "methods": [
+        {
+          "name": "listByBrand",
+          "visibility": "public",
+          "parameters": "brandId?",
+          "returns": "ModelDto[]"
+        },
+        {
+          "name": "create",
+          "visibility": "public",
+          "parameters": "input",
+          "returns": "ModelDto"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/models/application/models.service.ts",
+          "line": 10,
+          "end_line": 34
+        }
+      ]
+    },
+    {
+      "id": "builder",
+      "label": "VehicleConditionsBuilder",
+      "kind": "class",
+      "sublabel": "Builder de filtros del catálogo",
+      "row": 2,
+      "col": 1,
+      "attributes": [
+        {
+          "name": "conditions",
+          "visibility": "private",
+          "type": "SQL[]"
+        }
+      ],
+      "methods": [
+        {
+          "name": "from",
+          "visibility": "public",
+          "parameters": "filter",
+          "returns": "SQL | undefined",
+          "static": true
+        },
+        {
+          "name": "priceBetween",
+          "visibility": "private",
+          "parameters": "min, max",
+          "returns": "this"
+        },
+        {
+          "name": "search",
+          "visibility": "private",
+          "parameters": "term",
+          "returns": "this"
+        },
+        {
+          "name": "build",
+          "visibility": "private",
+          "returns": "SQL | undefined"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/vehicles/infrastructure/vehicle-conditions.builder.ts",
+          "line": 6,
+          "end_line": 58
+        }
+      ]
+    },
+    {
+      "id": "drizzlecolor",
+      "label": "DrizzleColorRepository",
+      "kind": "class",
+      "sublabel": "tabla colors",
+      "row": 2,
+      "col": 2,
+      "methods": [
+        {
+          "name": "toEntity",
+          "visibility": "protected",
+          "parameters": "row",
+          "returns": "ColorDto"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/colors/infrastructure/drizzle-color.repository.ts",
+          "line": 8,
+          "end_line": 20
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "service-repo",
+      "from": "crudservice",
+      "to": "crudrepo",
+      "kind": "association",
+      "label": "repository"
+    },
+    {
+      "id": "drizzlecrud-repo",
+      "from": "drizzlecrud",
+      "to": "crudrepo",
+      "kind": "realization"
+    },
+    {
+      "id": "brands-crud",
+      "from": "brands",
+      "to": "crudservice",
+      "kind": "inheritance"
+    },
+    {
+      "id": "models-crud",
+      "from": "models",
+      "to": "crudservice",
+      "kind": "inheritance"
+    },
+    {
+      "id": "models-brands",
+      "from": "models",
+      "to": "brands",
+      "kind": "dependency",
+      "label": "get(brandId)"
+    },
+    {
+      "id": "drizzlebrand-crud",
+      "from": "drizzlebrand",
+      "to": "drizzlecrud",
+      "kind": "inheritance"
+    },
+    {
+      "id": "drizzlecolor-crud",
+      "from": "drizzlecolor",
+      "to": "drizzlecrud",
+      "kind": "inheritance"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Patrones",
+      "items": [
+        "Template Method: CrudService fija el flujo list/get/create/update/remove; cada módulo solo define prepareCreate (y prepareUpdate si lo necesita).",
+        "Generic Repository: DrizzleCrudRepository implementa el CRUD una vez; cada repositorio concreto indica su tabla y su toEntity.",
+        "Builder: VehicleConditionsBuilder agrega al WHERE solo los filtros que el usuario envió."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Alcance",
+      "items": [
+        "ColorsService también extiende CrudService y DrizzleModelRepository extiende DrizzleCrudRepository; se omiten para no repetir la misma forma."
+      ]
+    }
+  ]
+}

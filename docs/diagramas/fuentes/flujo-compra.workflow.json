@@ -1,0 +1,312 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Flujo: compra de principio a fin",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/flujo-compra.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    },
+    "legend": {
+      "entries": {
+        "frontend": {
+          "label": "Web"
+        },
+        "backend": {
+          "label": "API / dominio"
+        },
+        "database": {
+          "label": "Base de datos"
+        },
+        "security": {
+          "label": "Seguridad / error"
+        },
+        "messagebus": {
+          "label": "Evento asíncrono"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "web",
+      "label": "Web (cliente)"
+    },
+    {
+      "id": "api",
+      "label": "API NestJS"
+    },
+    {
+      "id": "db",
+      "label": "Postgres"
+    },
+    {
+      "id": "err",
+      "label": "Errores",
+      "variant": "exception"
+    }
+  ],
+  "phases": [
+    {
+      "id": "p1",
+      "label": "Elegir",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "p2",
+      "label": "Autorizar y validar",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "security"
+    },
+    {
+      "id": "p3",
+      "label": "Confirmar",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "catalog",
+    "detail",
+    "guard",
+    "rules",
+    "tx",
+    "orders"
+  ],
+  "nodes": [
+    {
+      "id": "catalog",
+      "lane": "web",
+      "col": 0,
+      "type": "frontend",
+      "label": "Catálogo",
+      "sublabel": "filtros (Builder)",
+      "sources": [
+        {
+          "path": "apps/web/src/features/catalog/catalog-page.tsx"
+        }
+      ]
+    },
+    {
+      "id": "detail",
+      "lane": "web",
+      "col": 1,
+      "type": "frontend",
+      "label": "Detalle",
+      "sublabel": "Comprar ahora (1–3)",
+      "sources": [
+        {
+          "path": "apps/web/src/features/vehicle-detail/components/purchase-panel.tsx",
+          "line": 11,
+          "end_line": 40
+        }
+      ]
+    },
+    {
+      "id": "login",
+      "lane": "err",
+      "col": 1,
+      "type": "security",
+      "label": "Ingresa para comprar",
+      "sublabel": "sin sesión"
+    },
+    {
+      "id": "guard",
+      "lane": "api",
+      "col": 2,
+      "type": "security",
+      "label": "AuthGuard",
+      "sublabel": "JWT + rol",
+      "sources": [
+        {
+          "path": "apps/api/src/shared/auth/auth.guard.ts",
+          "line": 21,
+          "end_line": 42
+        }
+      ]
+    },
+    {
+      "id": "e401",
+      "lane": "err",
+      "col": 2,
+      "type": "security",
+      "label": "401 / 403",
+      "sublabel": "token inválido"
+    },
+    {
+      "id": "rules",
+      "lane": "api",
+      "col": 3,
+      "type": "backend",
+      "label": "Validaciones",
+      "sublabel": "5 reglas en cadena",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/application/purchase-chain.factory.ts",
+          "line": 9,
+          "end_line": 18
+        }
+      ]
+    },
+    {
+      "id": "e422",
+      "lane": "err",
+      "col": 3,
+      "type": "security",
+      "label": "422",
+      "sublabel": "regla incumplida"
+    },
+    {
+      "id": "tx",
+      "lane": "db",
+      "col": 4,
+      "type": "database",
+      "label": "Transacción",
+      "sublabel": "stock + pedido",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/infrastructure/drizzle-order.repository.ts",
+          "line": 14,
+          "end_line": 24
+        }
+      ]
+    },
+    {
+      "id": "rollback",
+      "lane": "err",
+      "col": 4,
+      "type": "security",
+      "label": "ROLLBACK",
+      "sublabel": "otro compró antes"
+    },
+    {
+      "id": "orders",
+      "lane": "web",
+      "col": 5,
+      "type": "frontend",
+      "label": "Mis pedidos",
+      "sublabel": "toast + pending",
+      "sources": [
+        {
+          "path": "apps/web/src/features/vehicle-detail/use-vehicle.ts",
+          "line": 17,
+          "end_line": 32
+        }
+      ]
+    },
+    {
+      "id": "stats",
+      "lane": "db",
+      "col": 5,
+      "type": "messagebus",
+      "label": "sales_stats",
+      "sublabel": "refresh asíncrono",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/recommendations/application/sales-stats.listener.ts",
+          "line": 18,
+          "end_line": 25
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "catalog-detail",
+      "from": "catalog",
+      "to": "detail",
+      "label": "elige auto"
+    },
+    {
+      "id": "detail-login",
+      "from": "detail",
+      "to": "login",
+      "label": "sin sesión",
+      "role": "branch",
+      "variant": "security"
+    },
+    {
+      "id": "detail-guard",
+      "from": "detail",
+      "to": "guard",
+      "label": "POST /orders",
+      "variant": "emphasis"
+    },
+    {
+      "id": "guard-rules",
+      "from": "guard",
+      "to": "rules",
+      "label": "usuario"
+    },
+    {
+      "id": "guard-401",
+      "from": "guard",
+      "to": "e401",
+      "role": "error",
+      "variant": "security"
+    },
+    {
+      "id": "rules-tx",
+      "from": "rules",
+      "to": "tx",
+      "label": "place()",
+      "variant": "emphasis"
+    },
+    {
+      "id": "rules-422",
+      "from": "rules",
+      "to": "e422",
+      "role": "error",
+      "variant": "security"
+    },
+    {
+      "id": "tx-rollback",
+      "from": "tx",
+      "to": "rollback",
+      "role": "error",
+      "variant": "security"
+    },
+    {
+      "id": "tx-orders",
+      "from": "tx",
+      "to": "orders",
+      "label": "201",
+      "variant": "emphasis"
+    },
+    {
+      "id": "tx-stats",
+      "from": "tx",
+      "to": "stats",
+      "label": "order.placed",
+      "role": "async",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Camino feliz",
+      "items": [
+        "El cliente elige un vehículo publicado, indica de 1 a 3 unidades y confirma.",
+        "La API valida, descuenta stock y crea el pedido en una sola transacción; la web lleva a Mis pedidos."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Salidas de error",
+      "items": [
+        "Sin sesión, la web pide ingresar antes de llamar a la API.",
+        "Las reglas (máximo 5 unidades, publicado, no propio, precio, stock) responden 422 con un mensaje claro.",
+        "Si dos compras compiten por la última unidad, una se revierte por completo."
+      ]
+    }
+  ]
+}

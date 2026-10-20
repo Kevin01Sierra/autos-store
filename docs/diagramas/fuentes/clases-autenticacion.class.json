@@ -1,0 +1,266 @@
+{
+  "schema_version": 1,
+  "diagram_type": "class",
+  "meta": {
+    "title": "Clases: autenticación y roles (Ports & Adapters)",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/clases-autenticacion.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "layout": {
+    "mode": "grid"
+  },
+  "types": [
+    {
+      "id": "guard",
+      "label": "AuthGuard",
+      "kind": "class",
+      "sublabel": "CanActivate de Nest",
+      "row": 0,
+      "col": 1,
+      "attributes": [
+        {
+          "name": "verifier",
+          "visibility": "private",
+          "type": "TokenVerifier"
+        },
+        {
+          "name": "roles",
+          "visibility": "private",
+          "type": "RoleReader"
+        },
+        {
+          "name": "reflector",
+          "visibility": "private",
+          "type": "Reflector"
+        }
+      ],
+      "methods": [
+        {
+          "name": "canActivate",
+          "visibility": "public",
+          "parameters": "context",
+          "returns": "boolean"
+        },
+        {
+          "name": "authenticate",
+          "visibility": "private",
+          "parameters": "header",
+          "returns": "AuthUser"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/shared/auth/auth.guard.ts",
+          "line": 11,
+          "end_line": 43
+        }
+      ]
+    },
+    {
+      "id": "verifier",
+      "label": "TokenVerifier",
+      "kind": "interface",
+      "sublabel": "Puerto · TOKEN_VERIFIER",
+      "row": 1,
+      "col": 0,
+      "methods": [
+        {
+          "name": "verify",
+          "visibility": "public",
+          "parameters": "token",
+          "returns": "{ userId, email }",
+          "abstract": true
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/shared/auth/auth-user.ts",
+          "line": 9,
+          "end_line": 12
+        }
+      ]
+    },
+    {
+      "id": "user",
+      "label": "AuthUser",
+      "kind": "record",
+      "sublabel": "request.user",
+      "row": 1,
+      "col": 1,
+      "attributes": [
+        {
+          "name": "id",
+          "visibility": "public",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "visibility": "public",
+          "type": "string?"
+        },
+        {
+          "name": "role",
+          "visibility": "public",
+          "type": "'admin' | 'customer'"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/shared/auth/auth-user.ts",
+          "line": 3,
+          "end_line": 7
+        }
+      ]
+    },
+    {
+      "id": "roles",
+      "label": "RoleReader",
+      "kind": "interface",
+      "sublabel": "Puerto · ROLE_READER",
+      "row": 1,
+      "col": 2,
+      "methods": [
+        {
+          "name": "roleOf",
+          "visibility": "public",
+          "parameters": "userId",
+          "returns": "Role",
+          "abstract": true
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/shared/auth/auth-user.ts",
+          "line": 14,
+          "end_line": 17
+        }
+      ]
+    },
+    {
+      "id": "supabase",
+      "label": "SupabaseTokenVerifier",
+      "kind": "class",
+      "sublabel": "Adapter: jose + JWKS",
+      "row": 2,
+      "col": 0,
+      "attributes": [
+        {
+          "name": "jwks",
+          "visibility": "private",
+          "type": "RemoteJWKSet"
+        },
+        {
+          "name": "issuer",
+          "visibility": "private",
+          "type": "string"
+        }
+      ],
+      "methods": [
+        {
+          "name": "verify",
+          "visibility": "public",
+          "parameters": "token",
+          "returns": "{ userId, email }"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/shared/auth/supabase-token.verifier.ts",
+          "line": 6,
+          "end_line": 26
+        }
+      ]
+    },
+    {
+      "id": "profile",
+      "label": "ProfileRoleReader",
+      "kind": "class",
+      "sublabel": "Adapter: tabla profiles",
+      "row": 2,
+      "col": 2,
+      "attributes": [
+        {
+          "name": "db",
+          "visibility": "private",
+          "type": "Database"
+        }
+      ],
+      "methods": [
+        {
+          "name": "roleOf",
+          "visibility": "public",
+          "parameters": "userId",
+          "returns": "Role"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/shared/auth/profile-role.reader.ts",
+          "line": 1,
+          "end_line": 19
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "guard-verifier",
+      "from": "guard",
+      "to": "verifier",
+      "kind": "association",
+      "label": "verifier"
+    },
+    {
+      "id": "guard-roles",
+      "from": "guard",
+      "to": "roles",
+      "kind": "association",
+      "label": "roles"
+    },
+    {
+      "id": "guard-user",
+      "from": "guard",
+      "to": "user",
+      "kind": "dependency",
+      "label": "crea"
+    },
+    {
+      "id": "supabase-verifier",
+      "from": "supabase",
+      "to": "verifier",
+      "kind": "realization"
+    },
+    {
+      "id": "profile-roles",
+      "from": "profile",
+      "to": "roles",
+      "kind": "realization"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "rose",
+      "title": "Flujo",
+      "items": [
+        "AuthGuard lee el encabezado Authorization: Bearer, valida el JWT con TokenVerifier y busca el rol con RoleReader.",
+        "@Auth('admin') guarda los roles requeridos; si el rol no alcanza, responde 403.",
+        "Sin token o con un token inválido responde 401."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Ports & Adapters + DI",
+      "items": [
+        "AuthModule enlaza TOKEN_VERIFIER → SupabaseTokenVerifier y ROLE_READER → ProfileRoleReader.",
+        "En las pruebas se reemplazan por dobles sin tocar AuthGuard."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "diagram_type": "class",
+  "meta": {
+    "title": "Clases: estados del pedido (State)",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/clases-estado-pedido.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "layout": {
+    "mode": "grid"
+  },
+  "types": [
+    {
+      "id": "service",
+      "label": "OrdersService",
+      "kind": "class",
+      "sublabel": "Cambia estados con permisos",
+      "row": 0,
+      "col": 0,
+      "methods": [
+        {
+          "name": "list",
+          "visibility": "public",
+          "parameters": "user",
+          "returns": "OrderDto[]"
+        },
+        {
+          "name": "get",
+          "visibility": "public",
+          "parameters": "id, user",
+          "returns": "OrderDto"
+        },
+        {
+          "name": "changeStatus",
+          "visibility": "public",
+          "parameters": "id, target, user",
+          "returns": "OrderDto"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/application/orders.service.ts",
+          "line": 10,
+          "end_line": 41
+        }
+      ]
+    },
+    {
+      "id": "factory",
+      "label": "OrderStateFactory",
+      "kind": "class",
+      "sublabel": "Un objeto por estado",
+      "row": 0,
+      "col": 2,
+      "attributes": [
+        {
+          "name": "states",
+          "visibility": "private",
+          "type": "Record<OrderStatus, OrderState>",
+          "static": true
+        }
+      ],
+      "methods": [
+        {
+          "name": "of",
+          "visibility": "public",
+          "parameters": "status",
+          "returns": "OrderState",
+          "static": true
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/order-state.ts",
+          "line": 47,
+          "end_line": 58
+        }
+      ]
+    },
+    {
+      "id": "state",
+      "label": "OrderState",
+      "kind": "abstract",
+      "sublabel": "Patrón State",
+      "row": 1,
+      "col": 1.5,
+      "attributes": [
+        {
+          "name": "status",
+          "visibility": "public",
+          "type": "OrderStatus"
+        },
+        {
+          "name": "next",
+          "visibility": "protected",
+          "type": "OrderStatus[]"
+        }
+      ],
+      "methods": [
+        {
+          "name": "transitionTo",
+          "visibility": "public",
+          "parameters": "target",
+          "returns": "OrderState"
+        },
+        {
+          "name": "releasesStock",
+          "visibility": "public",
+          "returns": "boolean"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/order-state.ts",
+          "line": 4,
+          "end_line": 22
+        }
+      ]
+    },
+    {
+      "id": "pending",
+      "label": "PendingState",
+      "kind": "class",
+      "sublabel": "pending",
+      "row": 2,
+      "col": 0,
+      "attributes": [
+        {
+          "name": "status",
+          "visibility": "public",
+          "type": "'pending'"
+        },
+        {
+          "name": "next",
+          "visibility": "protected",
+          "type": "paid, cancelled"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/order-state.ts",
+          "line": 24,
+          "end_line": 27
+        }
+      ]
+    },
+    {
+      "id": "paid",
+      "label": "PaidState",
+      "kind": "class",
+      "sublabel": "paid",
+      "row": 2,
+      "col": 1,
+      "attributes": [
+        {
+          "name": "status",
+          "visibility": "public",
+          "type": "'paid'"
+        },
+        {
+          "name": "next",
+          "visibility": "protected",
+          "type": "delivered, cancelled"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/order-state.ts",
+          "line": 29,
+          "end_line": 32
+        }
+      ]
+    },
+    {
+      "id": "delivered",
+      "label": "DeliveredState",
+      "kind": "class",
+      "sublabel": "delivered",
+      "row": 2,
+      "col": 2,
+      "attributes": [
+        {
+          "name": "status",
+          "visibility": "public",
+          "type": "'delivered'"
+        },
+        {
+          "name": "next",
+          "visibility": "protected",
+          "type": "[] final"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/order-state.ts",
+          "line": 34,
+          "end_line": 37
+        }
+      ]
+    },
+    {
+      "id": "cancelled",
+      "label": "CancelledState",
+      "kind": "class",
+      "sublabel": "cancelled",
+      "row": 2,
+      "col": 3,
+      "attributes": [
+        {
+          "name": "status",
+          "visibility": "public",
+          "type": "'cancelled'"
+        },
+        {
+          "name": "next",
+          "visibility": "protected",
+          "type": "[] final"
+        }
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/modules/orders/domain/order-state.ts",
+          "line": 39,
+          "end_line": 45
+        }
+      ],
+      "methods": [
+        {
+          "name": "releasesStock",
+          "visibility": "public",
+          "returns": "true"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "service-factory",
+      "from": "service",
+      "to": "factory",
+      "kind": "dependency",
+      "label": "of(status)"
+    },
+    {
+      "id": "factory-state",
+      "from": "factory",
+      "to": "state",
+      "kind": "composition",
+      "label": "4 instancias"
+    },
+    {
+      "id": "service-state",
+      "from": "service",
+      "to": "state",
+      "kind": "dependency",
+      "label": "transitionTo()"
+    },
+    {
+      "id": "pending-state",
+      "from": "pending",
+      "to": "state",
+      "kind": "inheritance"
+    },
+    {
+      "id": "paid-state",
+      "from": "paid",
+      "to": "state",
+      "kind": "inheritance"
+    },
+    {
+      "id": "delivered-state",
+      "from": "delivered",
+      "to": "state",
+      "kind": "inheritance"
+    },
+    {
+      "id": "cancelled-state",
+      "from": "cancelled",
+      "to": "state",
+      "kind": "inheritance"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Cómo funciona",
+      "items": [
+        "Cada estado declara a cuáles puede pasar; transitionTo lanza BusinessRuleError si el destino no está permitido.",
+        "CancelledState es el único que libera stock: el repositorio devuelve las unidades en la misma transacción.",
+        "El cliente solo puede cancelar; el admin mueve el pedido por todo su ciclo de vida."
+      ]
+    }
+  ]
+}

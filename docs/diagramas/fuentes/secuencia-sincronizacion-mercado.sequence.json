@@ -1,0 +1,272 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Secuencia: sincronización semanal de datos de mercado",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/secuencia-sincronizacion-mercado.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "participants": [
+    {
+      "id": "cron",
+      "type": "cloud",
+      "label": "GitHub Actions",
+      "sublabel": "lunes 06:00 UTC",
+      "sources": [
+        {
+          "path": ".github/workflows/scheduled.yml",
+          "line": 1,
+          "end_line": 18
+        }
+      ]
+    },
+    {
+      "id": "ctrl",
+      "type": "security",
+      "label": "MarketController",
+      "sublabel": "CronSecretGuard",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/presentation/market.controller.ts",
+          "line": 22,
+          "end_line": 27
+        },
+        {
+          "path": "apps/api/src/shared/http/cron-secret.guard.ts",
+          "line": 6,
+          "end_line": 18
+        }
+      ]
+    },
+    {
+      "id": "service",
+      "type": "backend",
+      "label": "MarketDataService",
+      "sublabel": "sync()",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/application/market-data.service.ts",
+          "line": 17,
+          "end_line": 23
+        }
+      ]
+    },
+    {
+      "id": "resilient",
+      "type": "backend",
+      "label": "Decorator",
+      "sublabel": "ResilientMarketSource",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/infrastructure/resilient-market.source.ts",
+          "line": 22,
+          "end_line": 36
+        }
+      ]
+    },
+    {
+      "id": "socrata",
+      "type": "backend",
+      "label": "Adapter",
+      "sublabel": "SocrataMarketSource",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/infrastructure/socrata-market.source.ts",
+          "line": 20,
+          "end_line": 40
+        }
+      ]
+    },
+    {
+      "id": "runt",
+      "type": "external",
+      "label": "datos.gov.co",
+      "sublabel": "Socrata SODA"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "market_stats",
+      "sources": [
+        {
+          "path": "apps/api/src/modules/market-data/infrastructure/drizzle-market-stats.repository.ts",
+          "line": 15,
+          "end_line": 28
+        }
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "from": 160,
+      "to": 277,
+      "label": "Disparo protegido"
+    },
+    {
+      "from": 282,
+      "to": 669,
+      "label": "Extracción"
+    },
+    {
+      "from": 674,
+      "to": 839,
+      "label": "Carga"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "cron",
+      "to": "ctrl",
+      "y": 170,
+      "label": "POST /api/market/sync",
+      "variant": "security",
+      "note": "Encabezado x-cron-secret comparado con timingSafeEqual; si no coincide, 401"
+    },
+    {
+      "id": "m2",
+      "from": "ctrl",
+      "to": "service",
+      "y": 262,
+      "label": "sync()",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m3",
+      "from": "service",
+      "to": "resilient",
+      "y": 292,
+      "label": "fetchRecords()",
+      "variant": "default",
+      "note": "Si hay caché vigente (1 h) responde sin salir a internet"
+    },
+    {
+      "id": "m4",
+      "from": "resilient",
+      "to": "socrata",
+      "y": 372,
+      "label": "fetchRecords()",
+      "variant": "default",
+      "note": "Hasta 3 intentos, con esperas de 500 ms y 1 s"
+    },
+    {
+      "id": "m5",
+      "from": "socrata",
+      "to": "runt",
+      "y": 452,
+      "label": "GET ?$select…&$group…&$limit=5000",
+      "variant": "emphasis",
+      "note": "Agrupa por marca, línea y año modelo; cuenta registros"
+    },
+    {
+      "id": "m6",
+      "from": "runt",
+      "to": "socrata",
+      "y": 532,
+      "label": "filas JSON",
+      "variant": "return"
+    },
+    {
+      "id": "m7",
+      "from": "socrata",
+      "to": "resilient",
+      "y": 562,
+      "label": "MarketRecord[]",
+      "variant": "return",
+      "note": "Normaliza nombres y descarta filas sin marca, modelo o periodo"
+    },
+    {
+      "id": "m8",
+      "from": "resilient",
+      "to": "service",
+      "y": 654,
+      "label": "MarketRecord[]",
+      "variant": "return"
+    },
+    {
+      "id": "m9",
+      "from": "service",
+      "to": "db",
+      "y": 684,
+      "label": "upsertMany(records)",
+      "variant": "emphasis",
+      "note": "DELETE source = 'demo'; INSERT … ON CONFLICT DO UPDATE units"
+    },
+    {
+      "id": "m10",
+      "from": "db",
+      "to": "service",
+      "y": 764,
+      "label": "n registros",
+      "variant": "return"
+    },
+    {
+      "id": "m11",
+      "from": "service",
+      "to": "ctrl",
+      "y": 794,
+      "label": "{ source, records }",
+      "variant": "return"
+    },
+    {
+      "id": "m12",
+      "from": "ctrl",
+      "to": "cron",
+      "y": 824,
+      "label": "200 OK",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "service",
+      "from": 257,
+      "to": 800,
+      "type": "backend"
+    },
+    {
+      "participant": "resilient",
+      "from": 287,
+      "to": 660,
+      "type": "backend"
+    },
+    {
+      "participant": "socrata",
+      "from": 367,
+      "to": 568,
+      "type": "backend"
+    },
+    {
+      "participant": "db",
+      "from": 679,
+      "to": 770,
+      "type": "database"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Cuándo corre",
+      "items": [
+        "El workflow Tareas programadas corre cada lunes a las 06:00 UTC y también a mano con Run workflow.",
+        "Si MARKET_DATASET_URL no está configurada, la fuente devuelve una lista vacía y no se borra nada."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Idempotente",
+      "items": [
+        "El upsert usa la llave (marca, modelo, color, periodo, fuente): repetir la sincronización actualiza unidades sin duplicar filas.",
+        "Los datos de demostración del seed se eliminan en cuanto llegan datos reales."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,332 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Propuesta de escalabilidad",
+    "locale": "es",
+    "output": "apps/web/public/diagramas/escalabilidad.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Kevin01Sierra/autos-store",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "27209a2287ee0c30c6fa1d0253e9797f9f2ad9a4"
+    }
+  },
+  "components": [
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "SPA estática",
+      "sublabel": "React + Vite (hoy)",
+      "pos": [
+        240,
+        60
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/web/vercel.json",
+          "line": 1,
+          "end_line": 12
+        }
+      ]
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Upstash Redis",
+      "sublabel": "nuevo · caché + rate limit",
+      "pos": [
+        740,
+        40
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "user",
+      "type": "external",
+      "label": "Clientes",
+      "sublabel": "picos de tráfico",
+      "icon": "person",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "cdn",
+      "type": "cloud",
+      "label": "Vercel Edge",
+      "sublabel": "ajuste · CDN s-maxage",
+      "pos": [
+        240,
+        220
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "API NestJS",
+      "sublabel": "funciones autoescalables",
+      "pos": [
+        480,
+        220
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/api/vercel.json",
+          "line": 1,
+          "end_line": 9
+        },
+        {
+          "path": "apps/api/api/index.js",
+          "line": 7,
+          "end_line": 14
+        }
+      ]
+    },
+    {
+      "id": "pooler",
+      "type": "cloud",
+      "label": "Supavisor",
+      "sublabel": "pooler de conexiones",
+      "pos": [
+        740,
+        220
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "sources": [
+        {
+          "path": "apps/api/src/shared/database/database.module.ts",
+          "line": 8,
+          "end_line": 25
+        }
+      ]
+    },
+    {
+      "id": "primary",
+      "type": "database",
+      "label": "Postgres primario",
+      "sublabel": "escrituras + outbox",
+      "pos": [
+        1010,
+        220
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "replica",
+      "type": "database",
+      "label": "Réplica de lectura",
+      "sublabel": "nuevo · lecturas",
+      "pos": [
+        1290,
+        220
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "queue",
+      "type": "messagebus",
+      "label": "Cola de eventos",
+      "sublabel": "nuevo · QStash",
+      "pos": [
+        480,
+        420
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "Worker asíncrono",
+      "sublabel": "nuevo · stats y mercado",
+      "pos": [
+        740,
+        420
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "runt",
+      "type": "external",
+      "label": "datos.gov.co",
+      "sublabel": "paginado con $offset",
+      "pos": [
+        1040,
+        420
+      ],
+      "size": [
+        170,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Vercel",
+      "wraps": [
+        "web",
+        "cdn",
+        "api"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Supabase",
+      "wraps": [
+        "pooler",
+        "primary",
+        "replica"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "user-cdn",
+      "from": "user",
+      "to": "cdn",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "cdn-web",
+      "from": "cdn",
+      "to": "web",
+      "label": "estáticos"
+    },
+    {
+      "id": "cdn-api",
+      "from": "cdn",
+      "to": "api",
+      "label": "/api/*",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-redis",
+      "from": "api",
+      "to": "redis",
+      "label": "lee / escribe caché",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "api-replica",
+      "from": "api",
+      "to": "replica",
+      "label": "lecturas GET",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "top"
+    },
+    {
+      "id": "api-pooler",
+      "from": "api",
+      "to": "pooler",
+      "label": "SQL"
+    },
+    {
+      "id": "pooler-primary",
+      "from": "pooler",
+      "to": "primary",
+      "label": "escrituras",
+      "variant": "emphasis"
+    },
+    {
+      "id": "primary-replica",
+      "from": "primary",
+      "to": "replica",
+      "label": "replicación",
+      "variant": "dashed"
+    },
+    {
+      "id": "api-queue",
+      "from": "api",
+      "to": "queue",
+      "label": "evento (outbox)",
+      "variant": "dashed"
+    },
+    {
+      "id": "queue-worker",
+      "from": "queue",
+      "to": "worker",
+      "label": "consume"
+    },
+    {
+      "id": "worker-pooler",
+      "from": "worker",
+      "to": "pooler",
+      "label": "refresh + upsert"
+    },
+    {
+      "id": "worker-runt",
+      "from": "worker",
+      "to": "runt",
+      "label": "SoQL paginado"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Fase 1: leer menos de la base de datos",
+      "items": [
+        "Cache-Control con s-maxage y stale-while-revalidate en GET de catálogo, marcas, modelos y mercado: la CDN de Vercel absorbe la mayoría de lecturas.",
+        "Redis compartido para el mapa de unidades de mercado y para recomendaciones por hash de preferencias; hoy la caché vive en la memoria de cada instancia.",
+        "Rate limit en POST /api/recommendations (público) e índices pg_trgm para la búsqueda con ILIKE."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Fase 2: sacar el trabajo pesado de la petición",
+      "items": [
+        "Patrón Outbox: la compra escribe un evento en la misma transacción y un worker lo procesa; en serverless un listener en memoria puede cortarse al responder.",
+        "Refrescar sales_stats en lote (por ejemplo cada 5 minutos) en vez de en cada compra.",
+        "Sincronización de mercado por páginas ($offset) para superar el límite de 5.000 filas y los 30 s de la función."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Fase 3: crecer horizontalmente",
+      "items": [
+        "Réplicas de lectura de Supabase para catálogo y recomendaciones; el primario solo atiende escrituras.",
+        "Los módulos ya se comunican por puertos y eventos: Recomendaciones y Mercado se pueden extraer como servicios propios sin tocar Pedidos.",
+        "Clave de idempotencia en POST /api/orders y observabilidad con OpenTelemetry + Sentry."
+      ]
+    }
+  ]
+}
