@@ -7,6 +7,20 @@ ventas de la propia tienda.
 
 ![Inicio](docs/screenshots/home.jpg)
 
+## Demo en vivo
+
+| Qué | URL |
+|---|---|
+| Tienda (web) | https://rueda-autos.vercel.app |
+| API REST | https://autos-store-api.vercel.app/api |
+| Documentación Swagger | https://autos-store-api.vercel.app/api/docs |
+| Estado de la API y la base de datos | https://autos-store-api.vercel.app/api/health |
+
+Desplegado en los planes gratuitos de Vercel (web y API serverless) y Supabase (Postgres y Auth).
+Para comprar hay que crear una cuenta desde **Ingresar**. La primera petición tras un rato sin uso
+puede tardar unos segundos mientras la función arranca. La raíz de la API (`/`) responde 404 a
+propósito: todos los endpoints viven bajo `/api`.
+
 ## Qué incluye
 
 | Requisito | Dónde |
