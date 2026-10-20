@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { MarketDataSource } from '../application/market-data.ports.js';
 import { monthStart, normalizeName, type MarketRecord } from '../domain/market-record.js';
-import { buildSocrataQuery, type SocrataFields } from './socrata-query.js';
+import { buildSocrataQuery, cleanSetting, type SocrataFields } from './socrata-query.js';
 
 type SocrataRow = Record<string, unknown>;
 
@@ -18,8 +18,9 @@ export class SocrataMarketSource implements MarketDataSource {
   constructor(private readonly config: ConfigService) {}
 
   async fetchRecords(): Promise<MarketRecord[]> {
-    const url = this.config.get<string>('MARKET_DATASET_URL');
+    const url = cleanSetting(this.config.get<string>('MARKET_DATASET_URL'));
     if (!url) return [];
+    if (!URL.canParse(url)) throw new Error(`MARKET_DATASET_URL no es una URL válida: ${url}`);
     const fields = this.fields();
     const response = await fetch(buildSocrataQuery(url, fields));
     if (!response.ok) throw new Error(`Socrata respondió ${response.status}`);
@@ -37,12 +38,12 @@ export class SocrataMarketSource implements MarketDataSource {
   }
 
   private fields(): SocrataFields {
-    const read = (key: string) => this.config.get<string>(key) || undefined;
+    const read = (key: string) => cleanSetting(this.config.get<string>(key));
     return {
-      brand: this.config.getOrThrow<string>('MARKET_FIELD_BRAND'),
-      model: this.config.getOrThrow<string>('MARKET_FIELD_MODEL'),
+      brand: read('MARKET_FIELD_BRAND') ?? 'marca',
+      model: read('MARKET_FIELD_MODEL') ?? 'linea',
       color: read('MARKET_FIELD_COLOR'),
-      period: this.config.getOrThrow<string>('MARKET_FIELD_PERIOD'),
+      period: read('MARKET_FIELD_PERIOD') ?? 'modelo',
       periodType: read('MARKET_PERIOD_TYPE') === 'date' ? 'date' : 'year',
       where: read('MARKET_WHERE'),
     };

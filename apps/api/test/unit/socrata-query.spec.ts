@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { modelUnits, monthStart, popularityKey } from '../../src/modules/market-data/domain/market-record.js';
-import { buildSocrataQuery } from '../../src/modules/market-data/infrastructure/socrata-query.js';
+import { buildSocrataQuery, cleanSetting } from '../../src/modules/market-data/infrastructure/socrata-query.js';
 
 const URL_RISARALDA = 'https://www.datos.gov.co/resource/x9pp-pcn5.json';
 const params = (url: string) => new URL(url).searchParams;
@@ -22,6 +22,13 @@ describe('Consulta a datos.gov.co (Socrata)', () => {
     }));
     expect(query.get('$group')).toBe('marca,linea,color,date_trunc_ym(fecha)');
     expect(query.has('$where')).toBe(false);
+  });
+
+  it('limpia valores pegados con comillas o backticks sin romper el SoQL', () => {
+    expect(cleanSetting(' `https://x.co/a.json` ')).toBe('https://x.co/a.json');
+    expect(cleanSetting("marca = 'KIA'")).toBe("marca = 'KIA'");
+    expect(cleanSetting("clase in(‘AUTOMOVIL','CAMPERO’)")).toBe("clase in('AUTOMOVIL','CAMPERO')");
+    expect(cleanSetting('  ')).toBeUndefined();
   });
 
   it('convierte un año en el primer día de ese año', () => {
